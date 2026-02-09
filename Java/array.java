@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class array {
+public class Array {
     public ArrayList<Object> array;
-    public array(Object... content) {
+    public Array(Object... content) {
         this.array = new ArrayList<>();
         this.array.addAll(Arrays.asList(content));
     }
-    public array() { this.array = new ArrayList<>(); }
+    public Array() { this.array = new ArrayList<>(); }
     public void add(Object x) {
         this.array.add(x);
     }
