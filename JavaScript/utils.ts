@@ -77,12 +77,23 @@ declare global {
         floor(): number;
         round(): number;
     }
+    interface Array<T> {
+        add(...items: T[]): void;
+        rm(...items: T[]): void;
+        has(...items: T[]): void;
+        sub(old: T, nw: T): void;
+        random(): T;
+    }
+    interface Object {
+        toBool(): boolean;
+        keys(): string[];
+        values<T>(): T[];
+        items<T>(): [string, T][];
+        str(): string;
+        has(key: string): boolean;
+    }
 }
-function attach<C extends new (...args: any[]) => any>(
-  ctor: C,
-  name: string,
-  fn: (this: InstanceType<C>, ...args: any[]) => any
-) {
+function attach<C extends new (...args: any[]) => any>(ctor: C, name: string, fn: (this: InstanceType<C>, ...args: any[]) => any) {
   Object.defineProperty(ctor.prototype, name, {
     value: fn,
     enumerable: false, // Standard methods are usually non-enumerable
@@ -93,6 +104,7 @@ function attach<C extends new (...args: any[]) => any>(
 const strMth = (name: string, fn: (this: String) => any) => attach(String, name, fn);
 const numMth = (name: string, fn: (this: Number) => any) => attach(Number, name, fn);
 const arrMth = <T>(name: string, fn: (this: Array<T>) => any) => attach(Array<T>, name, fn);
+const objMth = (name: string, fn: (this: Object) => any) => attach(Object, name, fn);
 
 strMth("toNum", function(this) {
     return Number(this);
@@ -125,8 +137,52 @@ function round(this: Number, places?: number): number | string {
     return Math.round(this.valueOf());
 }
 Number.prototype.round = round;
-arrMth("add", function(this, ...args: any[]) {
-    this.push(...args);
+function add<T>(this: Array<T>, ...items: T[]) {
+    this.push(...items);
+}
+function rm<T>(this: Array<T>, ...items: T[]) {
+    for(let i = this.length - 1; i >= 0; i--) {
+        if(items.includes(this[i])) {
+            this.splice(i, 1);
+        }
+    }
+}
+function has<T>(this: Array<T>, ...items: T[]) {
+    return items.every(i => this.includes(i));
+}
+function sub<T>(this: Array<T>, old: T, nw: T): void;
+function sub<T>(this: Array<T>, old: T, nw: T, count: number): void;
+function sub<T>(this: Array<T>, old: T, nw: T, count = Infinity) {
+    while(this.includes(old) && count > 0) {
+        this[this.indexOf(old)] = nw;
+        count--;
+    }
+}
+Array.prototype.add = add;
+Array.prototype.rm = rm;
+Array.prototype.has = has;
+Array.prototype.sub = sub;
+arrMth("random", function(this) {
+    return this[random(0, this.length)];
 });
+objMth("toBool", function(this) {
+    return !!this;
+});
+objMth("keys", function(this) {
+    return Object.keys(this);
+});
+objMth("values", function(this) {
+    return Object.values(this);
+});
+objMth("items", function(this) {
+    return Object.entries(this);
+});
+objMth("str", function(this) {
+    return JSON.stringify(this);
+});
+function objHas(this: Object, key: string) {
+    return Object.hasOwn(this, key);
+}
+Object.prototype.has = objHas;
 
 export { random, chance, wait };
