@@ -65,17 +65,38 @@ function chance(max: number, upperBound?: number): boolean {
 
 declare global {
     interface String {
+        /**
+         * Converts a string to its numeric form.
+         */
         toNum(): number;
+        /**
+         * Converts a string to an int.
+         */
         toInt(): number;
+        /**
+         * Converts a string to a float.
+         */
         toFloat(): number;
+        /**
+         * Converts a string to uppercase format.
+         */
         toUpper(): string;
+        /**
+         * Converts a string to lowercase format.
+         */
         toLower(): string;
+        /**
+         * Converts a string to titlecase format.
+         */
         toTitle(): string;
     }
     interface Number {
         roof(): number;
         floor(): number;
         round(): number;
+        round(places: number): string;
+        isInt(): boolean;
+        isFloat(): boolean;
     }
     interface Array<T> {
         add(...items: T[]): void;
@@ -91,15 +112,16 @@ declare global {
         items<T>(): [string, T][];
         str(): string;
         has(key: string): boolean;
+        is(): boolean;
     }
 }
 function attach<C extends new (...args: any[]) => any>(ctor: C, name: string, fn: (this: InstanceType<C>, ...args: any[]) => any) {
-  Object.defineProperty(ctor.prototype, name, {
-    value: fn,
-    enumerable: false, // Standard methods are usually non-enumerable
-    configurable: true,
-    writable: true,
-  });
+    Object.defineProperty(ctor.prototype, name, {
+        value: fn,
+        enumerable: false, // Standard methods are usually non-enumerable
+        configurable: true,
+        writable: true,
+    });
 }
 const strMth = (name: string, fn: (this: String) => any) => attach(String, name, fn);
 const numMth = (name: string, fn: (this: Number) => any) => attach(Number, name, fn);
@@ -184,5 +206,11 @@ function objHas(this: Object, key: string) {
     return Object.hasOwn(this, key);
 }
 Object.prototype.has = objHas;
+numMth("isInt", function(this) {
+    return Number.isInteger(this);
+});
+numMth("isFloat", function(this) {
+    return !Number.isInteger(this);
+});
 
 export { random, chance, wait };
