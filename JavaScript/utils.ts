@@ -91,11 +91,30 @@ declare global {
         toTitle(): string;
     }
     interface Number {
+        /**
+         * Returns the ceiling value.
+         */
         roof(): number;
+        /**
+         * Returns the floor value.
+         */
         floor(): number;
+        /**
+         * Returns the value, rounded to the nearest place.
+         */
         round(): number;
+        /**
+         * Returns a string of this, rounded to the amount of places.
+         * @param places The places to round to.
+         */
         round(places: number): string;
+        /**
+         * Returns whether this is an integer.
+         */
         isInt(): boolean;
+        /**
+         * Returns whether this is not an integer.
+         */
         isFloat(): boolean;
     }
     interface Array<T> {
@@ -128,30 +147,30 @@ const numMth = (name: string, fn: (this: Number) => any) => attach(Number, name,
 const arrMth = <T>(name: string, fn: (this: Array<T>) => any) => attach(Array<T>, name, fn);
 const objMth = (name: string, fn: (this: Object) => any) => attach(Object, name, fn);
 
-strMth("toNum", function(this) {
+String.prototype.toNum = function(this) {
     return Number(this);
-});
-strMth("toInt", function(this) {
+}
+String.prototype.toInt = function(this) {
     return parseInt(this.valueOf());
-});
-strMth("toFloat", function(this) {
+}
+String.prototype.toFloat = function(this) {
     return parseFloat(this.valueOf());
-});
-strMth("toUpper", function(this) {
+}
+String.prototype.toUpper = function(this) {
     return this.toUpperCase();
-});
-strMth("toLower", function(this) {
+}
+String.prototype.toLower = function(this) {
     return this.toLowerCase();
-});
-strMth("toTitle", function(this) {
+}
+String.prototype.toTitle = function(this) {
     return this.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
-});
-numMth("roof", function(this) {
+}
+Number.prototype.roof = function(this) {
     return Math.ceil(this.valueOf());
-});
-numMth("floor", function(this) {
+}
+Number.prototype.floor = function(this) {
     return Math.floor(this.valueOf());
-});
+}
 function round(this: Number): number;
 function round(this: Number, places: number): string;
 function round(this: Number, places?: number): number | string {
@@ -184,33 +203,33 @@ Array.prototype.add = add;
 Array.prototype.rm = rm;
 Array.prototype.has = has;
 Array.prototype.sub = sub;
-arrMth("random", function(this) {
+Array.prototype.random = function(this) {
     return this[random(0, this.length)];
-});
-objMth("toBool", function(this) {
+}
+Object.prototype.toBool = function(this) {
     return !!this;
-});
-objMth("keys", function(this) {
-    return Object.keys(this);
-});
-objMth("values", function(this) {
-    return Object.values(this);
-});
-objMth("items", function(this) {
-    return Object.entries(this);
-});
-objMth("str", function(this) {
+}
+Object.prototype.keys = function(this) {
+    return Object.keys(this.valueOf());
+}
+Object.prototype.values = function(this) {
+    return Object.values(this.valueOf());
+}
+Object.prototype.items = function(this) {
+    return Object.entries(this.valueOf());
+}
+Object.prototype.str = function(this) {
     return JSON.stringify(this);
-});
+}
 function objHas(this: Object, key: string) {
     return Object.hasOwn(this, key);
 }
 Object.prototype.has = objHas;
-numMth("isInt", function(this) {
+Number.prototype.isInt = function(this) {
     return Number.isInteger(this);
-});
-numMth("isFloat", function(this) {
-    return !Number.isInteger(this);
-});
+}
+Number.prototype.isFloat = function(this) {
+    return !this.isInt();
+}
 
 export { random, chance, wait };
