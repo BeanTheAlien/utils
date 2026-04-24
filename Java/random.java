@@ -1,4 +1,4 @@
-public class random {
+public class Random {
     public static int random() { return (int)(Math.random() * 101); }
     public static int random(int a) { return (int)(Math.random() * a); }
     public static int random(int a, int b) {
