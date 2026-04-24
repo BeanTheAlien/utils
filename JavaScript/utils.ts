@@ -118,20 +118,58 @@ declare global {
         isFloat(): boolean;
     }
     interface Array<T> {
+        /**
+         * Appends items to the array.
+         * @param items The items to add.
+         */
         add(...items: T[]): void;
+        /**
+         * Removes all occurences of the items from the array.
+         * @param items The items to remove.
+         */
         rm(...items: T[]): void;
+        /**
+         * Checks if all the items are present in the array.
+         * @param items The items to check.
+         */
         has(...items: T[]): void;
+        /**
+         * Substitutes old values for new values in the array.
+         * @param old The old value.
+         * @param nw The new value.
+         */
         sub(old: T, nw: T): void;
+        /**
+         * Returns a random element from the array.
+         */
         random(): T;
     }
     interface Object {
+        /**
+         * Converts this object to its boolean representation.
+         */
         toBool(): boolean;
+        /**
+         * Returns the keys of the object.
+         */
         keys(): string[];
+        /**
+         * Returns the values of the object.
+         */
         values<T>(): T[];
+        /**
+         * Returns the entries of the object.
+         */
         items<T>(): [string, T][];
+        /**
+         * Converts this object to a string.
+         */
         str(): string;
+        /**
+         * Returns whether this object contains a key `key`.
+         * @param key The key to check.
+         */
         has(key: string): boolean;
-        is(): boolean;
     }
 }
 function attach<C extends new (...args: any[]) => any>(ctor: C, name: string, fn: (this: InstanceType<C>, ...args: any[]) => any) {
