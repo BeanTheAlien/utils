@@ -1,0 +1,16 @@
+{
+  "name": "@beanthealien/utils",
+  "version": "1.0.0",
+  "description": "Various JS utils.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./utils": "./utils.js",
+    "./picker": "./picker.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}

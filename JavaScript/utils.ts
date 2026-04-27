@@ -172,18 +172,6 @@ declare global {
         has(key: string): boolean;
     }
 }
-function attach<C extends new (...args: any[]) => any>(ctor: C, name: string, fn: (this: InstanceType<C>, ...args: any[]) => any) {
-    Object.defineProperty(ctor.prototype, name, {
-        value: fn,
-        enumerable: false, // Standard methods are usually non-enumerable
-        configurable: true,
-        writable: true,
-    });
-}
-const strMth = (name: string, fn: (this: String) => any) => attach(String, name, fn);
-const numMth = (name: string, fn: (this: Number) => any) => attach(Number, name, fn);
-const arrMth = <T>(name: string, fn: (this: Array<T>) => any) => attach(Array<T>, name, fn);
-const objMth = (name: string, fn: (this: Object) => any) => attach(Object, name, fn);
 
 String.prototype.toNum = function(this) {
     return Number(this);
@@ -203,6 +191,7 @@ String.prototype.toLower = function(this) {
 String.prototype.toTitle = function(this) {
     return this.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
 }
+
 Number.prototype.roof = function(this) {
     return Math.ceil(this.valueOf());
 }
@@ -216,6 +205,13 @@ function round(this: Number, places?: number): number | string {
     return Math.round(this.valueOf());
 }
 Number.prototype.round = round;
+Number.prototype.isInt = function(this) {
+    return Number.isInteger(this);
+}
+Number.prototype.isFloat = function(this) {
+    return !this.isInt();
+}
+
 function add<T>(this: Array<T>, ...items: T[]) {
     this.push(...items);
 }
@@ -244,6 +240,7 @@ Array.prototype.sub = sub;
 Array.prototype.random = function(this) {
     return this[random(0, this.length)];
 }
+
 Object.prototype.toBool = function(this) {
     return !!this;
 }
@@ -263,11 +260,5 @@ function objHas(this: Object, key: string) {
     return Object.hasOwn(this, key);
 }
 Object.prototype.has = objHas;
-Number.prototype.isInt = function(this) {
-    return Number.isInteger(this);
-}
-Number.prototype.isFloat = function(this) {
-    return !this.isInt();
-}
 
 export { random, chance, wait };

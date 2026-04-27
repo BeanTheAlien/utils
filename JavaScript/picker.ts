@@ -2,7 +2,6 @@
  * The options for pickers.
  * 
  * Includes `id` and `start` properties.
- * @since v1.0.7
  */
 interface PickerOptions {
     /**
@@ -11,14 +10,12 @@ interface PickerOptions {
      * If the same ID is used for another picker, the picker opens in the same directory.
      * 
      * As specified by MDN Web Docs.
-     * @since v1.0.7
      */
     id?: string;
     /**
      * A `FileSystemHandle` or a well known directory ("desktop", "documents", "downloads", "music", "pictures", or "videos") to open the dialog in.
      * 
      * As specified by MDN Web Docs.
-     * @since v1.0.7
      */
     start?: FileSystemStartPosition;
 }
@@ -57,9 +54,26 @@ interface DirPickerFinalOptions extends PickerCleanedOptions {
 }
 type PickerCleanedOptions = { id?: string, startIn?: FileSystemStartPosition };
 abstract class Picker<P, H> {
+    /**
+     * Generates a picker prompt and returns the result.
+     * @param opts The picking options.
+     */
     abstract pick(opts: PickerOptions): Promise<P>;
+    /**
+     * Returns the resulting item as chosen by the user during the prompt.
+     * @param opts The picking options.
+     */
     abstract handle(opts: PickerOptions): Promise<H>;
+    /**
+     * Generates a clean variant of the picking options.
+     * @param opts The options to clean.
+     */
     abstract cleanOpts(opts: PickerOptions): PickerOptions;
+    /**
+     * Generates a cleaned set of options given `id` and `start`.
+     * @param opts The options to clean.
+     * @returns The cleaned options.
+     */
     clean(opts: PickerOptions): PickerCleanedOptions {
         return { id: opts.id, startIn: opts.start };
     }
@@ -79,7 +93,6 @@ type FilePickerHandleType = FileSystemFileHandle[];
  * Shows a file picker.
  * 
  * [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker)
- * @since v1.0.7
  */
 class FilePicker extends FilePickerBase<FilePickerPickType, FilePickerHandleType, FilePickerOptions, FilePickerFinalOptions> {
     async pick(opts: FilePickerOptions): Promise<FilePickerPickType> {
@@ -113,7 +126,6 @@ class SaveFilePicker extends FilePickerBase<FileSystemHandle, FileSystemHandle, 
  * Shows a directory picker.
  * 
  * [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)
- * @since v1.0.7
  */
 class DirPicker extends Picker<FileSystemDirectoryHandle, FileSystemDirectoryHandle> {
     async pick(opts: DirPickerOptions): Promise<FileSystemDirectoryHandle> {
