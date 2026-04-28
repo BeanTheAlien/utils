@@ -1,3 +1,4 @@
+package utils;
 public class Utils {
     public static int count(String input, String target) {
         int res = 0;

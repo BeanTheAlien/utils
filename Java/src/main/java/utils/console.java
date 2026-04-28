@@ -1,6 +1,7 @@
+package utils;
 public class console {
     private static String str(String d, Object... x) {
-        return (new Array(x)).join(d);
+        return (new Array<Object>(x)).join(d);
     }
     public static void println(Object... x) { System.out.println(console.str(" ", x)); }
     public static void println() { System.out.println(); }

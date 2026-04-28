@@ -2,5 +2,5 @@
 Various utility packages for various languages.
 
 # Included Languages
-- JavaScript (1 file)
-- Java (7 files)
+- JavaScript (2 files)
+- Java (8 files)

@@ -1,3 +1,4 @@
+package utils;
 import java.util.*;
 
 public class Array<T> {
@@ -7,7 +8,7 @@ public class Array<T> {
         this.array.addAll(this.list(content));
     }
     public Array() {
-        this.array = new ArrayList();
+        this.array = new ArrayList<T>();
     }
     private List<T> list(T... x) {
         return Arrays.asList(x);
@@ -77,7 +78,7 @@ public class Array<T> {
         return this.slice(start, end, 1);
     }
     public T[] slice(int start, int end, int increment) {
-        ArrayList<T> slice = new ArrayList();
+        ArrayList<T> slice = new ArrayList<T>();
         for(int i = start; i < this.len(); i += increment) slice.add(this.get(i));
         T[] result = this.array(slice.size());
         for(int i = 0; i < slice.size(); i++) result[i] = slice.get(i);
