@@ -10,13 +10,10 @@ public class Utils {
     public static int count(String input, char target) {
         return count(input, str(target));
     }
-    public static int count(Object[] input, char target) {
-        return count(input, String.valueOf(target));
-    }
-    public static int count(Object[] input, String target) {
+    public static int count(Object[] input, Object target) {
         int res = 0;
         for(Object item : input) {
-            if(String.valueOf(item).equals(target)) res++;
+            if(item.equals(target)) res++;
         }
         return res;
     }

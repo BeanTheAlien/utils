@@ -1,5 +1,7 @@
 package utils;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@code Array} is a convenient wrapper around {@code ArrayList}.
@@ -154,24 +156,62 @@ public class Array<T> {
         for(int i = start; i < end; i++) if(this.get(i).equals(item)) if(n == occur) return i; else n++;
         return -1;
     }
+    /**
+     * Returns whether this array contains all the elements specified in {@code x}.
+     * @param x The elements to test.
+     * @return Whether they are all contained.
+     */
     public boolean has(T... x) {
         return this.array.containsAll(this.list(x));
     }
+    /**
+     * Clears the array.
+     */
     public void empty() {
         this.array.clear();
     }
     private T[] array(int size) {
         return (T[])new Object[size];
     }
+    /**
+     * Takes a shallow slice of the array, starting from index 0.
+     * @return A shallow copy.
+     */
     public T[] slice() {
         return this.slice(0);
     }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start}.
+     * @param start The starting index.
+     * @return A shallow copy.
+     */
     public T[] slice(int start) {
         return this.slice(start, this.len());
     }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @return A shallow copy.
+     */
     public T[] slice(int start, int end) {
         return this.slice(start, end, 1);
     }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
+     * <br><br>
+     * Captures every {@code increment} element.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @param increment The step to capture.
+     * @return A shallow copy.
+     * <pre>
+     * // capturing every nth element
+     * Array<String> arr = new Array<String>("foo", "bar", "foo", "bar");
+     * // capturing every other element will be 'bar', 'bar'
+     * System.out.println(java.util.Arrays.toString(arr.slice(1, arr.len(), 2))); // expected output: ["bar", "bar"]
+     * </pre>
+     */
     public T[] slice(int start, int end, int increment) {
         ArrayList<T> slice = new ArrayList<T>();
         for(int i = start; i < this.len(); i += increment) slice.add(this.get(i));
@@ -179,28 +219,93 @@ public class Array<T> {
         for(int i = 0; i < slice.size(); i++) result[i] = slice.get(i);
         return result;
     }
+    /**
+     * Removes elements, starting from index 0.
+     */
     public void splice() {
         this.splice(0);
     }
+    /**
+     * Removes elements, starting from index {@code start}.
+     * @param start The starting index.
+     */
     public void splice(int start) {
         this.splice(start, this.len());
     }
+    /**
+     * Removes elements, starting from index {@code start} and ending with {@code end}.
+     * @param start The starting index.
+     * @param end The ending index.
+     */
     public void splice(int start, int end) {
         this.splice(start, end, 1);
     }
+    /**
+     * Removes elements, starting from index {@code start} and ending with {@code end}.
+     * <br><br>
+     * Removes every {@code increment} element.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @param increment The step to remove.
+     * <pre>
+     * // removing every nth element
+     * Array<String> arr = new Array<String>("foo", "bar", "foo", "bar");
+     * System.out.println(arr.toString());
+     * arr.splice(1, arr.len(), 2); // remove 'bar', 'bar'
+     * System.out.println(arr.toString()); // expected output: ["foo", "foo"]
+     * </pre>
+     */
     public void splice(int start, int end, int increment) {
         for(int i = start; i < end; i += increment) this.rmAt(i);
     }
+    /**
+     * Removes elements, starting from index {@code start}.
+     * <br><br>
+     * Appends elements {@code addElements} after removal.
+     * @param start The starting index.
+     * @param addElements The elements to add.
+     */
     public void splice(int start, T... addElements) {
         this.splice(start, this.len(), addElements);
     }
+    /**
+     * Removes elements, starting from index {@code start} and ending with {@code end}.
+     * <br><br>
+     * Appends elements {@code addElements} after removal.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @param addElements The elements to add.
+     */
     public void splice(int start, int end, T... addElements) {
         this.splice(start, end, 1, addElements);
     }
+    /**
+     * Removes elements, starting from index {@code start} and ending with {@code end}.
+     * <br><br>
+     * Removes every {@code increment} element.
+     * <br><br>
+     * Appends elements {@code addElements} after removal.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @param increment The step to remove.
+     * @param addElements The elements to add.
+     * <pre>
+     * // removing every nth element, adding new elements
+     * Array<String> arr = new Array<String>("foo", "bar", "foo", "bar");
+     * System.out.println(arr.toString());
+     * arr.splice(1, arr.len(), 2, "hello", "world"); // remove 'bar', 'bar'
+     * System.out.println(arr.toString()); // expected output: ["foo", "foo", "hello", "world"]
+     * </pre>
+     */
     public void splice(int start, int end, int increment, T... addElements) {
         this.splice(start, end, increment);
         this.add(addElements);
     }
+    /**
+     * Returns this array as a string, given a delimiter.
+     * @param delim The delimiter.
+     * @return This array, joined by the delimiter.
+     */
     public String join(Object delim) {
         String string = "";
         for(int i = 0; i < this.len(); i++) {
@@ -212,12 +317,27 @@ public class Array<T> {
         }
         return string;
     }
+    /**
+     * Counts the times an item, {@code item}, shows up.
+     * @param item The item to count.
+     * @return The times it shows up.
+     */
     public int count(T item) {
-        return Utils.count(this.array.toArray(), Utils.str(item));
+        return Utils.count(this.array.toArray(), item);
     }
+    /**
+     * Resizes this array to the length.
+     * <br><br>
+     * Effectively takes a splice from {@code length} onward.
+     * @param length The new length.
+     */
     public void len(int length) {
         this.array.subList(length, this.len()).clear();
     }
+    /**
+     * Returns this array as an array.
+     * @return This, as an array.
+     */
     public T[] toArray() {
         return (T[])this.array.toArray();
     }
