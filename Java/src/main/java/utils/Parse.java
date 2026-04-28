@@ -1,7 +1,14 @@
 package utils;
+import java.util.function.Function;
 
 public class Parse {
-    public int toInt(String str) {
-        return Integer.parseInt(str);
+    private static <T> T toT(String in, Function<String, T> parser) {
+        return parser.apply(in);
+    }
+    public static int toInt(String str) {
+        return toT(str, Integer::parseInt);
+    }
+    public static float toFloat(String str) {
+        return toT(str, Float::parseFloat);
     }
 }
