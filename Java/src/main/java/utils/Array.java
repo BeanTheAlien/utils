@@ -2,6 +2,8 @@ package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
+import java.util.stream.*;
 
 /**
  * {@code Array} is a convenient wrapper around {@code ArrayList}.
@@ -340,5 +342,14 @@ public class Array<T> {
      */
     public T[] toArray() {
         return (T[])this.array.toArray();
+    }
+    public void sort() {
+        this.array.sort();
+    }
+    public void sortr() {
+        Collections.reverse(this.array);
+    }
+    public Stream<T> stream() {
+        return this.array.stream();
     }
 }
