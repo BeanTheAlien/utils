@@ -2,10 +2,12 @@ package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.stream.*;
 
 /**
@@ -176,9 +178,9 @@ public class Array<T> {
     public void empty() {
         this.array.clear();
     }
-    private T[] array(int size) {
-        return (T[])new Object[size];
-    }
+    // private T[] array(int size) {
+    //     return (T[])new Object[size];
+    // }
     /**
      * Takes a shallow slice of the array, starting from index 0.
      * @return A shallow copy.
@@ -219,11 +221,9 @@ public class Array<T> {
      * </pre>
      */
     public T[] slice(int start, int end, int increment) {
-        ArrayList<T> slice = new ArrayList<T>();
+        Array<T> slice = new Array<T>();
         for(int i = start; i < this.len(); i += increment) slice.add(this.get(i));
-        T[] result = this.array(slice.size());
-        for(int i = 0; i < slice.size(); i++) result[i] = slice.get(i);
-        return result;
+        return slice.toArray();
     }
     /**
      * Removes elements, starting from index 0.
@@ -347,49 +347,142 @@ public class Array<T> {
     public T[] toArray() {
         return (T[])this.array.toArray();
     }
+    /**
+     * Sorts this array, given a comparison.
+     * @param comparator The comparison.
+     */
     public void sort(Comparator<? super T> comparator) {
         this.array.sort(comparator);
     }
-    public void sortr() {
+    /**
+     * Reverses this array.
+     */
+    public void reverse() {
         Collections.reverse(this.array);
     }
     private <K> List<K> collect(Stream<K> stream) {
         return stream.collect(Collectors.toList());
     }
+    /**
+     * Creates a {@code Stream} of this array.
+     * @return A {@code Stream}.
+     */
     public Stream<T> stream() {
         return this.array.stream();
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code filter} operation.
+     * @param predicate The filter predicate.
+     * @return The resulting {@code Stream} of the filter.
+     */
     public Stream<T> filters(Predicate<? super T> predicate) {
         return this.stream().filter(predicate);
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code filter} operation.
+     * @param predicate The filter predicate.
+     * @return The resulting list, following collection.
+     */
     public List<T> filter(Predicate<? super T> predicate) {
         return this.collect(this.filters(predicate));
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code map} operation.
+     * @param mapper The mapping function.
+     * @return The resulting {@code Stream} of the map.
+     */
     public <R> Stream<R> maps(Function<? super T, ? extends R> mapper) {
         return this.stream().map(mapper);
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code map} operation.
+     * @param predicate The mapping function.
+     * @return The resulting list, following collection.
+     */
     public <R> List<R> map(Function<? super T, ? extends R> mapper) {
         return this.collect(this.maps(mapper));
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code flatMap} operation.
+     * @param mapper The mapping function.
+     * @return The resulting {@code Stream} of the map.
+     */
     public <R> Stream<R> flatMaps(Function<? super T, ? extends Stream<? extends R>> mapper) {
         return this.stream().flatMap(mapper);
     }
+    /**
+     * Creates a {@code Stream} of this array and runs the {@code flatMap} operation.
+     * @param predicate The mapping function.
+     * @return The resulting list, following collection.
+     */
     public <R> List<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
         return this.collect(this.flatMaps(mapper));
     }
+    /**
+     * Runs an operation for every element in the array.
+     * @param action The action to be ran.
+     */
     public void forEach(Consumer<? super T> action) {
         this.stream().forEach(action);
     }
+    /**
+     * Returns whether the predicate matches any element in the array.
+     * @param predicate The predicate test.
+     * @return Whether an element matched.
+     */
     public boolean some(Predicate<? super T> predicate) {
         return this.stream().anyMatch(predicate);
     }
+    /**
+     * Returns whether the predicate matches every element in the array.
+     * @param predicate The predicate test.
+     * @return Whether all elements matched.
+     */
     public boolean every(Predicate<? super T> predicate) {
         return this.stream().allMatch(predicate);
     }
+    /**
+     * Returns whether the predicate matches no elements in the array.
+     * @param predicate The predicate test.
+     * @return Whether no elements matched.
+     */
     public boolean none(Predicate<? super T> predicate) {
         return this.stream().noneMatch(predicate);
     }
+    /**
+     * Tries to find an element in the array, given a predicate.
+     * @param predicate The predicate test.
+     * @return The element, or {@code null} if the predicate failed.
+     */
     public Optional<T> find(Predicate<? super T> predicate) {
         return this.filters(predicate).findFirst();
+    }
+    /**
+     * Returns an iterator.
+     * @return An iterator.
+     */
+    public Iterator<T> iterator() {
+        return this.iter();
+    }
+    /**
+     * Returns an iterator.
+     * @return An iterator.
+     */
+    public Iterator<T> iter() {
+        return this.array.iterator();
+    }
+    /**
+     * Returns a list iterator.
+     * @return A list iterator.
+     */
+    public ListIterator<T> listIterator() {
+        return this.liter();
+    }
+    /**
+     * Returns a list iterator.
+     * @return A list iterator.
+     */
+    public ListIterator<T> liter() {
+        return this.array.listIterator();
     }
 }
