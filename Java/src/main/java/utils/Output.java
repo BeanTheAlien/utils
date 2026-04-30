@@ -3,6 +3,9 @@ import java.io.PrintStream;
 
 public class Output {
     public PrintStream stream;
+    public Output(PrintStream stream) {
+        this.stream = stream;
+    }
     private String str(String d, Object... x) {
         return (new Array<Object>(x)).join(d);
     }

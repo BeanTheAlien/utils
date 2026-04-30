@@ -2,13 +2,17 @@ package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.*;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.stream.*;
 
 /**
  * {@code Array} is a convenient wrapper around {@code ArrayList}.
  * <br><br>
  * It streamlines support between operations, providing useful UX that {@code ArrayList} lacks.
+ * @param <T> The type of object this array contains.
  */
 public class Array<T> {
     public ArrayList<T> array;
@@ -343,13 +347,49 @@ public class Array<T> {
     public T[] toArray() {
         return (T[])this.array.toArray();
     }
-    public void sort() {
-        this.array.sort();
+    public void sort(Comparator<? super T> comparator) {
+        this.array.sort(comparator);
     }
     public void sortr() {
         Collections.reverse(this.array);
     }
+    private <K> List<K> collect(Stream<K> stream) {
+        return stream.collect(Collectors.toList());
+    }
     public Stream<T> stream() {
         return this.array.stream();
+    }
+    public Stream<T> filters(Predicate<? super T> predicate) {
+        return this.stream().filter(predicate);
+    }
+    public List<T> filter(Predicate<? super T> predicate) {
+        return this.collect(this.filters(predicate));
+    }
+    public <R> Stream<R> maps(Function<? super T, ? extends R> mapper) {
+        return this.stream().map(mapper);
+    }
+    public <R> List<R> map(Function<? super T, ? extends R> mapper) {
+        return this.collect(this.maps(mapper));
+    }
+    public <R> Stream<R> flatMaps(Function<? super T, ? extends Stream<? extends R>> mapper) {
+        return this.stream().flatMap(mapper);
+    }
+    public <R> List<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
+        return this.collect(this.flatMaps(mapper));
+    }
+    public void forEach(Consumer<? super T> action) {
+        this.stream().forEach(action);
+    }
+    public boolean some(Predicate<? super T> predicate) {
+        return this.stream().anyMatch(predicate);
+    }
+    public boolean every(Predicate<? super T> predicate) {
+        return this.stream().allMatch(predicate);
+    }
+    public boolean none(Predicate<? super T> predicate) {
+        return this.stream().noneMatch(predicate);
+    }
+    public Optional<T> find(Predicate<? super T> predicate) {
+        return this.filters(predicate).findFirst();
     }
 }
