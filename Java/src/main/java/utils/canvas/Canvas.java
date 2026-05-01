@@ -1,5 +1,7 @@
+package utils.canvas;
 import java.awt.*;
 import javax.swing.*;
+import utils.Array;
 
 public class Canvas extends JPanel {
     public Array<Renderable> rend;

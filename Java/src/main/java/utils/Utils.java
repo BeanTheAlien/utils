@@ -29,4 +29,7 @@ public class Utils {
     public static <T> boolean is(T a, T b) {
         return a.equals(b);
     }
+    public static <T> boolean is(Class<T> clazz, Object obj) {
+        return clazz.isInstance(obj);
+    }
 }

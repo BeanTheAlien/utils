@@ -1,8 +1,11 @@
-import java.awt.*;
+package utils.canvas;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javax.swing.*;
 
 public class Frame {
     public JFrame frame;
+    public Canvas canvas;
     public static enum Close {
         Kill,
         Dispose,
@@ -25,35 +28,35 @@ public class Frame {
     }
     private int operationSize(Size size) {
         return size == Size.Norm ? JFrame.NORMAL :
-            size == Size.Conf ? JFrame.ICONFINED :
+            size == Size.Conf ? JFrame.ICONIFIED :
             size == Size.MaxW ? JFrame.MAXIMIZED_HORIZ :
             size == Size.MaxH ? JFrame.MAXIMIZED_VERT :
             size == Size.Max ? JFrame.MAXIMIZED_BOTH :
             -1;
     }
-    public Canvas() {
+    public Frame() {
         this("Frame");
     }
-    public Canvas(String windowName) {
-        this(windowName, Close.Kill);
+    public Frame(String windowName) {
+        this(windowName, Close.Kill, Size.Max);
     }
-    public Canvas(Close closeOperation) {
+    public Frame(Close closeOperation) {
         this(closeOperation, Size.Max);
     }
-    public Canvas(Size sizeOperation) {
+    public Frame(Size sizeOperation) {
         this(Close.Kill, sizeOperation);
     }
-    public Canvas(Close closeOperation, Size sizeOperation) {
-        this("Frame", closeOperation, sizeOperation)
+    public Frame(Close closeOperation, Size sizeOperation) {
+        this("Frame", closeOperation, sizeOperation);
     }
-    public Canvas(String windowName, Close closeOperation, Size sizeOperation) {
+    public Frame(String windowName, Close closeOperation, Size sizeOperation) {
         this.frame = new JFrame(windowName);
         this.frame.setDefaultCloseOperation(this.operationClose(closeOperation));
         this.frame.setExtendedState(this.operationSize(sizeOperation));
         this.frame.setVisible(true);
-        Canvas canvas = new Canvas();
-        this.frame.add(canvas);
-        canvas.requestFocusInWindow();
+        this.canvas = new Canvas();
+        this.frame.add(this.canvas);
+        this.canvas.requestFocusInWindow();
         this.frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 canvas.rend.forEach(r -> r.kill());
