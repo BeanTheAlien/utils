@@ -23,6 +23,7 @@ public class Parse {
     /**
      * Parses a string to an integer.
      * @param str The string to parse.
+     * @param radix The radix base.
      * @return The int representation, base {@code radix}.
      */
     public static int toInt(String str, int radix) {

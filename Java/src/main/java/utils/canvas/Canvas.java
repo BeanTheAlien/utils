@@ -10,10 +10,11 @@ public class Canvas extends JPanel {
     public Canvas() {
         this(true);
     }
-    public Canvas(int delay) {}
+    public Canvas(int delay) {
+        this(delay, true);
+    }
     public Canvas(boolean focusable) {
-        this.setFocusable(focusable);
-        this.rend = new Array<Renderable>();
+        this(100, focusable);
     }
     public Canvas(int delay, boolean focusable) {
         this.setFocusable(focusable);
