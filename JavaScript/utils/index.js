@@ -29,18 +29,6 @@ function random(a, b) {
 function chance(max, upperBound) {
     return max <= random((upperBound ?? 100) + 1);
 }
-function attach(ctor, name, fn) {
-    Object.defineProperty(ctor.prototype, name, {
-        value: fn,
-        enumerable: false, // Standard methods are usually non-enumerable
-        configurable: true,
-        writable: true,
-    });
-}
-const strMth = (name, fn) => attach(String, name, fn);
-const numMth = (name, fn) => attach(Number, name, fn);
-const arrMth = (name, fn) => attach((Array), name, fn);
-const objMth = (name, fn) => attach(Object, name, fn);
 String.prototype.toNum = function () {
     return Number(this);
 };
@@ -71,6 +59,12 @@ function round(places) {
     return Math.round(this.valueOf());
 }
 Number.prototype.round = round;
+Number.prototype.isInt = function () {
+    return Number.isInteger(this);
+};
+Number.prototype.isFloat = function () {
+    return !this.isInt();
+};
 function add(...items) {
     this.push(...items);
 }
@@ -116,10 +110,4 @@ function objHas(key) {
     return Object.hasOwn(this, key);
 }
 Object.prototype.has = objHas;
-Number.prototype.isInt = function () {
-    return Number.isInteger(this);
-};
-Number.prototype.isFloat = function () {
-    return !this.isInt();
-};
 export { random, chance, wait };

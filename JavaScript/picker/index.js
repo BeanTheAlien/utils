@@ -1,5 +1,10 @@
 "use strict";
 class Picker {
+    /**
+     * Generates a cleaned set of options given `id` and `start`.
+     * @param opts The options to clean.
+     * @returns The cleaned options.
+     */
     clean(opts) {
         return { id: opts.id, startIn: opts.start };
     }
@@ -17,7 +22,6 @@ class FilePickerBase extends Picker {
  * Shows a file picker.
  *
  * [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker)
- * @since v1.0.7
  */
 class FilePicker extends FilePickerBase {
     async pick(opts) {
@@ -51,7 +55,6 @@ class SaveFilePicker extends FilePickerBase {
  * Shows a directory picker.
  *
  * [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker)
- * @since v1.0.7
  */
 class DirPicker extends Picker {
     async pick(opts) {

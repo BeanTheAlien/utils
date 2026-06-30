@@ -6,11 +6,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
-    "./utils": "./utils.js",
-    "./picker": "./picker.js"
+    "./utils": "./utils/index.js",
+    "./picker": "./picker/index.js",
+    "./io": "./io/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.0.1"
+  }
 }

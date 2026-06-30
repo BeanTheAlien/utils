@@ -3,6 +3,7 @@
     "target": "es2022",
     "module": "esnext",
     "lib": ["es2022", "dom"],
+    "types": ["node"],
     "strict": true
   }
 }
