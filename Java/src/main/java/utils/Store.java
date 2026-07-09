@@ -86,5 +86,6 @@ public class Store<I, O> {
             I e = arr[i];
             out.put(e, this.map.get(e));
         }
+        this.map = out;
     }
 }
