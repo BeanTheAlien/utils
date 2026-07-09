@@ -24,7 +24,7 @@ public class Array<T> {
      */
     public Array(T... content) {
         this();
-        this.array.addAll(this.list(content));
+        this.add(content);
     }
     /**
      * Creates an {@code Array}.
@@ -189,12 +189,27 @@ public class Array<T> {
         return this.slice(0);
     }
     /**
+     * Takes a shallow slice of the array, starting from index 0.
+     * @return A shallow copy (as an array).
+     */
+    public Array<T> slicea() {
+        return this.slicea(0);
+    }
+    /**
      * Takes a shallow slice of the array, starting from index {@code start}.
      * @param start The starting index.
      * @return A shallow copy.
      */
     public T[] slice(int start) {
         return this.slice(start, this.len());
+    }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start}.
+     * @param start The starting index.
+     * @return A shallow copy (as an array).
+     */
+    public Array<T> slicea(int start) {
+        return this.slicea(start, this.len());
     }
     /**
      * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
@@ -204,6 +219,15 @@ public class Array<T> {
      */
     public T[] slice(int start, int end) {
         return this.slice(start, end, 1);
+    }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @return A shallow copy (as an array).
+     */
+    public Array<T> slicea(int start, int end) {
+        return this.slicea(start, end, 1);
     }
     /**
      * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
@@ -221,9 +245,27 @@ public class Array<T> {
      * </pre>
      */
     public T[] slice(int start, int end, int increment) {
+        return this.slicea(start, end, increment).toArray();
+    }
+    /**
+     * Takes a shallow slice of the array, starting from index {@code start} and ending with {@code end}.
+     * <br><br>
+     * Captures every {@code increment} element.
+     * @param start The starting index.
+     * @param end The ending index.
+     * @param increment The step to capture.
+     * @return A shallow copy (as an array).
+     * <pre>
+     * // capturing every nth element
+     * Array<String> arr = new Array<String>("foo", "bar", "foo", "bar");
+     * // capturing every other element will be 'bar', 'bar'
+     * System.out.println(arr.slicea(1, arr.len(), 2).toString()); // expected output: ["bar", "bar"]
+     * </pre>
+     */
+    public Array<T> slicea(int start, int end, int increment) {
         Array<T> slice = new Array<T>();
         for(int i = start; i < this.len(); i += increment) slice.add(this.get(i));
-        return slice.toArray();
+        return slice;
     }
     /**
      * Removes elements, starting from index 0.
@@ -329,7 +371,7 @@ public class Array<T> {
      * @return The times it shows up.
      */
     public int count(T item) {
-        return Utils.count(this.array.toArray(), item);
+        return Utils.count(this.toArray(), item);
     }
     /**
      * Resizes this array to the length.
