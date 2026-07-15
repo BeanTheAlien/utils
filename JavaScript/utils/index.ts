@@ -89,6 +89,18 @@ declare global {
          * Converts a string to titlecase format.
          */
         toTitle(): string;
+        /**
+         * Shorthand for `indexOf`.
+         * @param search The string to look for.
+         * @param offset The offset.
+         */
+        idxOf(search: string, offset?: number): number;
+        /**
+         * Returns all indexes where `search` occurs.
+         * @param search The string to look for.
+         * @param offset The offset.
+         */
+        idxsOf(search: string, offset?: number): number[];
     }
     interface Number {
         /**
@@ -143,6 +155,18 @@ declare global {
          * Returns a random element from the array.
          */
         random(): T;
+        /**
+         * Shorthand for `indexOf`.
+         * @param search The element to look for.
+         * @param offset The offset.
+         */
+        idxOf(search: T, offset?: number): number;
+        /**
+         * Returns all indexes where `search` occurs.
+         * @param search The element to look for.
+         * @param offset The offset.
+         */
+        idxsOf(search: T, offset?: number): number[];
     }
     interface Object {
         /**
@@ -172,7 +196,6 @@ declare global {
         has(key: string): boolean;
     }
 }
-
 String.prototype.toNum = function(this) {
     return Number(this);
 }
@@ -190,6 +213,21 @@ String.prototype.toLower = function(this) {
 }
 String.prototype.toTitle = function(this) {
     return this.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
+}
+String.prototype.idxOf = String.prototype.indexOf;
+String.prototype.idxsOf = function(this, off) {
+    return idxsOfCore(this, off);
+}
+function idxsOfCore<T>(thisArg: String | Array<T>, search: string | T, off?: number) {
+    const out: number[] = [];
+    const idx = (o: number) => thisArg instanceof String ? thisArg.indexOf(search as string, o) : thisArg.indexOf(search as T, o);
+    let next = off ?? 0;
+    let i = idx(next);
+    while(i != -1) {
+        out.push(i);
+        i = idx(next);
+    }
+    return out;
 }
 
 Number.prototype.roof = function(this) {
@@ -239,6 +277,10 @@ Array.prototype.has = has;
 Array.prototype.sub = sub;
 Array.prototype.random = function(this) {
     return this[random(0, this.length)];
+}
+Array.prototype.idxOf = Array.prototype.indexOf;
+Array.prototype.idxsOf = function(this, off) {
+    return idxsOfCore(this, off);
 }
 
 Object.prototype.toBool = function(this) {
