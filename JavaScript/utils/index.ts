@@ -236,13 +236,10 @@ Number.prototype.roof = function(this) {
 Number.prototype.floor = function(this) {
     return Math.floor(this.valueOf());
 }
-function round(this: Number): number;
-function round(this: Number, places: number): string;
-function round(this: Number, places?: number): number | string {
+Number.prototype.round = function(this, places) {
     if(places) return this.toFixed(places);
     return Math.round(this.valueOf());
 }
-Number.prototype.round = round;
 Number.prototype.isInt = function(this) {
     return Number.isInteger(this);
 }
@@ -301,6 +298,8 @@ Object.prototype.str = function(this) {
 function objHas(this: Object, key: string) {
     return Object.hasOwn(this, key);
 }
-Object.prototype.has = objHas;
+Object.prototype.has = function(this, key) {
+    return Object.hasOwn(this, key);
+}
 
 export { random, chance, wait };
