@@ -236,10 +236,13 @@ Number.prototype.roof = function(this) {
 Number.prototype.floor = function(this) {
     return Math.floor(this.valueOf());
 }
-Number.prototype.round = function(this, places) {
+function round(this: Number): number;
+function round(this: Number, places: number): string;
+function round(this: Number, places?: number) {
     if(places) return this.toFixed(places);
     return Math.round(this.valueOf());
 }
+Number.prototype.round = round;
 Number.prototype.isInt = function(this) {
     return Number.isInteger(this);
 }
@@ -247,19 +250,6 @@ Number.prototype.isFloat = function(this) {
     return !this.isInt();
 }
 
-function add<T>(this: Array<T>, ...items: T[]) {
-    this.push(...items);
-}
-function rm<T>(this: Array<T>, ...items: T[]) {
-    for(let i = this.length - 1; i >= 0; i--) {
-        if(items.includes(this[i])) {
-            this.splice(i, 1);
-        }
-    }
-}
-function has<T>(this: Array<T>, ...items: T[]) {
-    return items.every(i => this.includes(i));
-}
 function sub<T>(this: Array<T>, old: T, nw: T): void;
 function sub<T>(this: Array<T>, old: T, nw: T, count: number): void;
 function sub<T>(this: Array<T>, old: T, nw: T, count = Infinity) {
@@ -268,9 +258,19 @@ function sub<T>(this: Array<T>, old: T, nw: T, count = Infinity) {
         count--;
     }
 }
-Array.prototype.add = add;
-Array.prototype.rm = rm;
-Array.prototype.has = has;
+Array.prototype.add = function<T>(this, ...items: T[]) {
+    this.push(...items);
+}
+Array.prototype.rm = function<T>(this, ...items: T[]) {
+    for(let i = this.length - 1; i >= 0; i--) {
+        if(items.includes(this[i])) {
+            this.splice(i, 1);
+        }
+    }
+}
+Array.prototype.has = function<T>(this, ...items: T[]) {
+    return items.every(i => this.includes(i));
+}
 Array.prototype.sub = sub;
 Array.prototype.random = function(this) {
     return this[random(0, this.length)];
@@ -294,9 +294,6 @@ Object.prototype.items = function(this) {
 }
 Object.prototype.str = function(this) {
     return JSON.stringify(this);
-}
-function objHas(this: Object, key: string) {
-    return Object.hasOwn(this, key);
 }
 Object.prototype.has = function(this, key) {
     return Object.hasOwn(this, key);

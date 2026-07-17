@@ -47,6 +47,21 @@ String.prototype.toLower = function () {
 String.prototype.toTitle = function () {
     return this.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
 };
+String.prototype.idxOf = String.prototype.indexOf;
+String.prototype.idxsOf = function (off) {
+    return idxsOfCore(this, off);
+};
+function idxsOfCore(thisArg, search, off) {
+    const out = [];
+    const idx = (o) => thisArg instanceof String ? thisArg.indexOf(search, o) : thisArg.indexOf(search, o);
+    let next = off ?? 0;
+    let i = idx(next);
+    while (i != -1) {
+        out.push(i);
+        i = idx(next);
+    }
+    return out;
+}
 Number.prototype.roof = function () {
     return Math.ceil(this.valueOf());
 };
@@ -65,31 +80,32 @@ Number.prototype.isInt = function () {
 Number.prototype.isFloat = function () {
     return !this.isInt();
 };
-function add(...items) {
-    this.push(...items);
-}
-function rm(...items) {
-    for (let i = this.length - 1; i >= 0; i--) {
-        if (items.includes(this[i])) {
-            this.splice(i, 1);
-        }
-    }
-}
-function has(...items) {
-    return items.every(i => this.includes(i));
-}
 function sub(old, nw, count = Infinity) {
     while (this.includes(old) && count > 0) {
         this[this.indexOf(old)] = nw;
         count--;
     }
 }
-Array.prototype.add = add;
-Array.prototype.rm = rm;
-Array.prototype.has = has;
+Array.prototype.add = function (...items) {
+    this.push(...items);
+};
+Array.prototype.rm = function (...items) {
+    for (let i = this.length - 1; i >= 0; i--) {
+        if (items.includes(this[i])) {
+            this.splice(i, 1);
+        }
+    }
+};
+Array.prototype.has = function (...items) {
+    return items.every(i => this.includes(i));
+};
 Array.prototype.sub = sub;
 Array.prototype.random = function () {
     return this[random(0, this.length)];
+};
+Array.prototype.idxOf = Array.prototype.indexOf;
+Array.prototype.idxsOf = function (off) {
+    return idxsOfCore(this, off);
 };
 Object.prototype.toBool = function () {
     return !!this;
@@ -106,8 +122,7 @@ Object.prototype.items = function () {
 Object.prototype.str = function () {
     return JSON.stringify(this);
 };
-function objHas(key) {
+Object.prototype.has = function (key) {
     return Object.hasOwn(this, key);
-}
-Object.prototype.has = objHas;
+};
 export { random, chance, wait };
