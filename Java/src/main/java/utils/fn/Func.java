@@ -1,6 +1,6 @@
 package utils.fn;
 
 @FunctionalInterface
-interface Func<A> {
+public interface Func<A> {
     A run();
 }
