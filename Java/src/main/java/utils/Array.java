@@ -527,4 +527,19 @@ public class Array<T> {
     public ListIterator<T> liter() {
         return this.array.listIterator();
     }
+    private <R> List<R> __clist(Function<String, ? extends R> func) {
+        return this.map(x -> func.apply(String.valueOf(x)));
+    }
+    public List<String> toStringList() {
+        return this.__clist(String::valueOf);
+    }
+    public List<Integer> toIntList() {
+        return this.__clist(Integer::valueOf);
+    }
+    public List<Double> toDblList() {
+        return this.__clist(Double::valueOf);
+    }
+    public List<Float> toFloatList() {
+        return this.__clist(Float::valueOf);
+    }
 }
