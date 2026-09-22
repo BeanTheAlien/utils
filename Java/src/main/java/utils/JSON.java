@@ -1,11 +1,13 @@
 package utils;
 import java.util.HashMap;
 
-import utils.JSON.JSONError.JSONSyntaxError;
-import utils.JSON.JSONObject.JSONArray;
-import utils.JSON.JSONObject.JSONDictionary;
+import utils.JSON.JSONError.*;
+import utils.JSON.JSONObject.*;
 
 public class JSON {
+    public static void main(String[] args) throws JSONError {
+        System.out.println(JSON.parse("[\"this is a test\", [\"hello\", \"world\"]]"));
+    }
     public static interface JSONObject {
         public static class JSONDictionary extends HashMap<String, Object> implements JSONObject {
             String src;
@@ -38,7 +40,7 @@ public class JSON {
             }
         }
     }
-    public static JSONObject parse(String json) throws JSONError.JSONSyntaxError {
+    public static JSONObject parse(String json) throws JSONSyntaxError {
         JSONObject jo;
         // run parsing algorithim
         // RULES:
@@ -46,20 +48,14 @@ public class JSON {
         // no trailing comma
         // start with '{' or '['
 
-        // JSON object type; '{' for Dictionary, '[' for Array
-        char jot = json.charAt(0);
-        // invalid JSON object!
-        if(jot != '{' && jot != '[') throw new JSONError.JSONSyntaxError(jot, 0);
-        // now check the back
-        char jot2 = json.charAt(json.length() - 1);
-        // invalid JSON object!
-        if((jot == '{' && jot2 != '}') || (jot == '[' && jot2 != ']')) throw new JSONError.JSONSyntaxError(jot2, json.length() - 1);
-        // just test now for single quotes
-        if(json.contains("'")) throw new JSONError.JSONSyntaxError("'", json.indexOf("'"));
-        // determine JSON type
-        jo = jot == '{' ? new JSONObject.JSONDictionary(json) : new JSONObject.JSONArray(json);
         // since each structure is handled differently, pass it on to the other parser
         final JSONParser parser = new JSONParser(json);
+        // JSON object type; '{' for Dictionary, '[' for Array
+        char jot = json.charAt(0);
+        // validate JSON now
+        parser.validateJSON();
+        // determine JSON type
+        jo = jot == '{' ? new JSONDictionary(json) : new JSONArray(json);
         if(jo instanceof JSONDictionary jd) parser.parseAsDictionary(jd);
         else if(jo instanceof JSONArray ja) parser.parseAsArray(ja);
         return jo;
@@ -72,7 +68,9 @@ public class JSON {
         public void parseAsDictionary(JSONDictionary dict) {
             // parsing it as a dictionary
         }
-        public void parseAsArray(JSONArray arr) throws JSONError.JSONSyntaxError {
+        public void parseAsArray(JSONArray arr) throws JSONSyntaxError {
+            // clean JSON
+            this.json = this.json.substring(1, this.json.length() - 1);
             // parsing it as an array is easy
             // we know it has closure, so we can
             // skip the check for array closure
@@ -89,7 +87,7 @@ public class JSON {
                     // guard against sparse arrays
                     if(jv.length() == 0) {
                         // ...then we have't collected anything
-                        throw new JSONError.JSONSyntaxError(c, p);
+                        throw new JSONSyntaxError(c, p);
                     }
                     // otherwise, push the element
                     arr.add(jv);
@@ -99,6 +97,8 @@ public class JSON {
                     if(inStr) inStr = false;
                     // else, entering a string
                     else inStr = true;
+                    // consume the character
+                    jv += c;
                 } else {
                     // otherwise, we can consume the character
                     jv += c;
@@ -106,9 +106,54 @@ public class JSON {
                 // make sure to increment
                 p++;
             }
+            // append final result
+            arr.add(jv);
+            // now that we've collected everything
+            // we need to parse the array elements
+            // to potentially parse sub-elements
+            arr.replaceAll(o -> {
+                String os = (String)o;
+                // then this would be a number
+                if(Character.isDigit(os.charAt(0))) {
+                    return os.contains(".") ? Double.parseDouble(os) : Integer.parseInt(os);
+                }
+                // recursively call parse
+                else if(os.startsWith("{") || os.startsWith("[")) {
+                    char ch = os.charAt(0);
+                    final JSONParser parse = new JSONParser(os);
+                    try {
+                        if(ch == '{') {
+                            JSONDictionary jd = new JSONDictionary(os);
+                            parse.parseAsDictionary(jd);
+                            return jd;
+                        }
+                        else if(ch == '[') {
+                            JSONArray ja = new JSONArray(os);
+                            parse.parseAsArray(ja);
+                            return ja;
+                        }
+                    } catch(JSONSyntaxError e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }
+                return o;
+            });
+        }
+        public void validateJSON() throws JSONSyntaxError {
+            // JSON object type; '{' for Dictionary, '[' for Array
+            char jot = this.json.charAt(0);
+            // invalid JSON object!
+            if(jot != '{' && jot != '[') throw new JSONSyntaxError(jot, 0);
+            // now check the back
+            char jot2 = this.json.charAt(this.json.length() - 1);
+            // invalid JSON object!
+            if((jot == '{' && jot2 != '}') || (jot == '[' && jot2 != ']')) throw new JSONSyntaxError(jot2, this.json.length() - 1);
+            // just test now for single quotes
+            if(this.json.contains("'")) throw new JSONSyntaxError("'", this.json.indexOf("'"));
         }
     }
-    public static String stringify(JSONObject json) throws JSONError.JSONTypeError {
+    public static String stringify(JSONObject json) throws JSONTypeError {
         return "";
     }
 }
