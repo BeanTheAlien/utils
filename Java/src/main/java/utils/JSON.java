@@ -1,5 +1,8 @@
 package utils;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
+
 import utils.JSON.JSONError.*;
 import utils.JSON.JSONObject.*;
 import utils.fn.Func2;
@@ -8,8 +11,8 @@ public class JSON {
     public static void main(String[] args) throws JSONError {
         String ja1 = "[\"this is a test\", [\"hello\", \"world\"]]";
         String jd1 = "{ \"this\": \"is\", \"a\": \"test\" }";
-        String jea1 = "[\"this\", \"errors\",]";
-        System.out.println(JSON.parse(ja1));
+        String ja2 = "[\"this\", \"errors\",]";
+        System.out.println(JSON.parse(jd1));
     }
     public static interface JSONObject {
         public static class JSONDictionary extends HashMap<String, Object> implements JSONObject {
@@ -241,7 +244,42 @@ public class JSON {
             if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
         public String stringifyAsDictionary(JSONDictionary dict, JSONReviver replacer) throws JSONTypeError {
-            return "";
+            // we can easily key, value stringification
+            Set<String> keys = dict.keySet();
+            String out = "{ ";
+            for(String k : keys) {
+                out += k + ": ";
+                // now, test value
+                String v = String.valueOf(dict.get(k));
+                // if value is number, add as a regular number
+                if(Character.isDigit(v.charAt(0))) out += dict.get(k);
+                // maybe a boolean
+                if(v.equals("true") || v.equals("false")) out += dict.get(k);
+                // and lastly, null
+                if(v.equals("null")) out += null;
+                // otherwise, looks like JSON?
+                char vc = v.strip().charAt(0);
+                if(vc == '{' || vc == '[') {
+                    // looks like JSON
+                    final JSONParser parse = new JSONParser(v);
+                    JSONObject js = null;
+                    try {
+                        if(vc == '{') {
+                            js = new JSONDictionary(v);
+                            parse.parseAsDictionary((JSONDictionary)js, null);
+                        } else if(vc == '[') {
+                            js = new JSONArray(v);
+                            parse.parseAsArray((JSONArray)js, null);
+                        }
+                    } catch(JSONSyntaxError e) {
+                        e.printStackTrace();
+                    }
+                    // parsed out the JSON string
+                    // now we have to re-string it
+                    out += JSON.stringify(js, replacer);
+                }
+            }
+            return out + " }";
         }
         public String stringifyAsArray(JSONArray arr, JSONReviver replacer) throws JSONTypeError {
             // we can't just convert everything to a string
