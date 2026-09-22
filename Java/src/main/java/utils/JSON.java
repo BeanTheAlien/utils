@@ -196,12 +196,14 @@ public class JSON {
         }
         public Object parseGeneric(String object) {
             char ch = object.charAt(0);
+            // get a null string check out of the way
+            if(object.equals("null")) return null;
             // then this would be a number
             if(Character.isDigit(ch)) {
                 return object.contains(".") ? Double.parseDouble(object) : Integer.parseInt(object);
             }
             // recursively call parse
-            else if(object.startsWith("{") || object.startsWith("[")) {
+            else if(ch == '{' || ch == '[') {
                 final JSONParser parse = new JSONParser(object);
                 try {
                     if(ch == '{') {
@@ -238,8 +240,17 @@ public class JSON {
             char jot3 = this.json.charAt(us.charAt(us.length() - 1));
             if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
+        public String stringifyAsDictionary(JSONDictionary dict, JSONReviver replacer) throws JSONTypeError {
+            return "";
+        }
+        public String stringifyAsArray(JSONArray arr, JSONReviver replacer) throws JSONTypeError {
+            // we can't just convert everything to a string
+            // respect JSON object specifications
+            // number, boolean and null don't stringify
+            return "";
+        }
     }
-    public String stringify(JSONObject json, JSONReviver replacer) throws JSONTypeError {
+    public static String stringify(JSONObject json, JSONReviver replacer) throws JSONTypeError {
         return "";
     }
 }
