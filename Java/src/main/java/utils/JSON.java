@@ -6,7 +6,10 @@ import utils.JSON.JSONObject.*;
 
 public class JSON {
     public static void main(String[] args) throws JSONError {
-        System.out.println(JSON.parse("[\"this is a test\", [\"hello\", \"world\"]]"));
+        String ja1 = "[\"this is a test\", [\"hello\", \"world\"]]";
+        String jd1 = "{ \"this\": \"is\", \"a\": \"test\" }";
+        String jea1 = "[\"this\", \"errors\",]";
+        System.out.println(JSON.parse(ja1));
     }
     public static interface JSONObject {
         public static class JSONDictionary extends HashMap<String, Object> implements JSONObject {
