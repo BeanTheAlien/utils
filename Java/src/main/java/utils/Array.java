@@ -7,6 +7,9 @@ import java.util.function.*;
 import java.util.Collections;
 import java.util.stream.*;
 
+import utils.fn.VoidFunc;
+import utils.fn.VoidFunc2;
+
 /**
  * {@code Array} is a convenient wrapper around {@code ArrayList}.
  * <br><br>

@@ -59,7 +59,7 @@ public class Frame {
         this.canvas.requestFocusInWindow();
         this.frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                canvas.rend.forEach(r -> r.kill());
+                //canvas.rend.forEach(r -> r.kill());
             }
         });
     }

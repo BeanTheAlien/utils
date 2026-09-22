@@ -21,12 +21,12 @@ public class Canvas extends JPanel {
         this.rend = new Array<Renderable>();
         this.timer = new Timer(delay, (e) -> {
             this.delta++;
-            this.rend.forEach(r -> r.tick());
+            //this.rend.forEach(r -> r.tick());
             this.repaint();
         });
     }
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        this.rend.forEach(r -> r.render(new Brush(g)));
+        //this.rend.forEach(r -> r.render(new Brush(g)));
     }
 }

@@ -1,8 +1,8 @@
 package utils;
 import java.util.HashMap;
-
 import utils.JSON.JSONError.*;
 import utils.JSON.JSONObject.*;
+import utils.fn.Func2;
 
 public class JSON {
     public static void main(String[] args) throws JSONError {
@@ -132,14 +132,14 @@ public class JSON {
             // to potentially parse sub-elements
             // first pass sent to reviver
             if(reviver != null) {
-                JSONDictionary out = new JSONDictionary();
+                JSONDictionary out = new JSONDictionary(this.json);
                 dict.keySet().forEach(k -> out.put(k, reviver.run(k, dict.get(k))));
                 // now we can set it back into the dictionary
                 out.keySet().forEach(k -> dict.put(k, out.get(k)));
             }
             // second pass sent to standard parser
-            JSONDictionary out = new JSONDictionary();
-            dict.keySet().forEach(k -> out.put(this.parseGeneric((String)(dict.get(k)))));
+            JSONDictionary out = new JSONDictionary(this.json);
+            dict.keySet().forEach(k -> out.put(k, this.parseGeneric((String)(dict.get(k)))));
             out.keySet().forEach(k -> dict.put(k, out.get(k)));
         }
         public void parseAsArray(JSONArray arr, JSONReviver reviver) throws JSONSyntaxError {
@@ -186,7 +186,7 @@ public class JSON {
             // to potentially parse sub-elements
             // first pass sent to reviver
             if(reviver != null) {
-                JSONArray out = new JSONArray();
+                JSONArray out = new JSONArray(this.json);
                 arr.forEach((v, i) -> out.add(reviver.run(String.valueOf(i), v)));
                 // now we can set it back into the array
                 out.forEach(arr::set);
@@ -208,12 +208,12 @@ public class JSON {
                 try {
                     if(ch == '{') {
                         JSONDictionary jd = new JSONDictionary(object);
-                        parse.parseAsDictionary(jd);
+                        parse.parseAsDictionary(jd, null);
                         return jd;
                     }
                     else if(ch == '[') {
                         JSONArray ja = new JSONArray(object);
-                        parse.parseAsArray(ja);
+                        parse.parseAsArray(ja, null);
                         return ja;
                     }
                 } catch(JSONSyntaxError e) {
@@ -236,8 +236,8 @@ public class JSON {
             if(this.json.contains("'")) throw new JSONSyntaxError("'", this.json.indexOf("'"));
             // or ends with comma
             // replace spaces (we don't care about content)
-            String us = this.json.replaceAll("\\s", "");
-            char jot3 = this.json.charAt(us.charAt(us.length() - 1));
+            String us = this.json.replaceAll(" ", "");
+            char jot3 = us.charAt(us.length() - 1);
             if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
         public String stringifyAsDictionary(JSONDictionary dict, JSONReviver replacer) throws JSONTypeError {
