@@ -40,7 +40,11 @@ public class JSON {
             }
         }
     }
+    public static interface JSONReviver extends Func2<String, Object, Object> {}
     public static JSONObject parse(String json) throws JSONSyntaxError {
+        return JSON.parse(json, null);
+    }
+    public static JSONObject parse(String json, JSONReviver reviver) throws JSONSyntaxError {
         JSONObject jo;
         // run parsing algorithim
         // RULES:
@@ -56,21 +60,88 @@ public class JSON {
         parser.validateJSON();
         // determine JSON type
         jo = jot == '{' ? new JSONDictionary(json) : new JSONArray(json);
-        if(jo instanceof JSONDictionary jd) parser.parseAsDictionary(jd);
-        else if(jo instanceof JSONArray ja) parser.parseAsArray(ja);
+        if(jo instanceof JSONDictionary jd) parser.parseAsDictionary(jd, reviver);
+        else if(jo instanceof JSONArray ja) parser.parseAsArray(ja, reviver);
         return jo;
     }
     public static class JSONParser {
         String json;
         public JSONParser(String jsonString) {
-            this.json = jsonString;
+            this.json = jsonString.strip();
         }
-        public void parseAsDictionary(JSONDictionary dict) {
-            // parsing it as a dictionary
-        }
-        public void parseAsArray(JSONArray arr) throws JSONSyntaxError {
-            // clean JSON
+        public void cleanJSON() {
             this.json = this.json.substring(1, this.json.length() - 1);
+        }
+        public void parseAsDictionary(JSONDictionary dict, JSONReviver reviver) throws JSONSyntaxError {
+            // clean JSON
+            this.cleanJSON();
+            // parsing it as a dictionary
+            // parsing it as an dict is harder
+            // we know it has closure, so we can
+            // skip the check for object closure
+            // temporary JSON key/value (reset after comma)
+            String jk = "";
+            String jv = "";
+            // position tracker
+            int p = 0;
+            boolean inStr = false;
+            boolean inKey = true;
+            while(p < this.json.length()) {
+                char c = this.json.charAt(p);
+                // found a comma
+                // (check if we're in a string)
+                if(c == ',' && !inStr) {
+                    // guard against empty keys
+                    if(jk.length() == 0) {
+                        // ...then the key is blank
+                        throw new JSONSyntaxError(c, p);
+                    }
+                    // otherwise, put the pair
+                    dict.put(jk, jv);
+                    jk = "";
+                    jv = "";
+                }
+                // found a colon
+                // (check if we're in a string)
+                else if(c == ':' && !inStr) {
+                    // then swap off to putting value
+                    inKey = false;
+                    p++;
+                    continue;
+                }
+                // entering string
+                else if(c == '"') {
+                    inStr = !inStr;
+                    if(inKey) jk += c;
+                    else jv += c;
+                }
+                // else, consume
+                else {
+                    if(inKey) jk += c;
+                    else jv += c;
+                }
+                p++;
+            }
+            // insert final result
+            dict.put(jk, jv);
+            // now that we've collected everything
+            // we need to parse the array elements
+            // to potentially parse sub-elements
+            // first pass sent to reviver
+            if(reviver != null) {
+                JSONDictionary out = new JSONDictionary();
+                dict.keySet().forEach(k -> out.put(k, reviver.run(k, dict.get(k))));
+                // now we can set it back into the dictionary
+                out.keySet().forEach(k -> dict.put(k, out.get(k)));
+            }
+            // second pass sent to standard parser
+            JSONDictionary out = new JSONDictionary();
+            dict.keySet().forEach(k -> out.put(this.parseGeneric((String)(dict.get(k)))));
+            out.keySet().forEach(k -> dict.put(k, out.get(k)));
+        }
+        public void parseAsArray(JSONArray arr, JSONReviver reviver) throws JSONSyntaxError {
+            // clean JSON
+            this.cleanJSON();
             // parsing it as an array is easy
             // we know it has closure, so we can
             // skip the check for array closure
@@ -94,9 +165,8 @@ public class JSON {
                     jv = "";
                 } else if(c == '"') {
                     // out of the string
-                    if(inStr) inStr = false;
-                    // else, entering a string
-                    else inStr = true;
+                    // or entering string
+                    inStr = !inStr;
                     // consume the character
                     jv += c;
                 } else {
@@ -111,34 +181,42 @@ public class JSON {
             // now that we've collected everything
             // we need to parse the array elements
             // to potentially parse sub-elements
-            arr.replaceAll(o -> {
-                String os = (String)o;
-                // then this would be a number
-                if(Character.isDigit(os.charAt(0))) {
-                    return os.contains(".") ? Double.parseDouble(os) : Integer.parseInt(os);
-                }
-                // recursively call parse
-                else if(os.startsWith("{") || os.startsWith("[")) {
-                    char ch = os.charAt(0);
-                    final JSONParser parse = new JSONParser(os);
-                    try {
-                        if(ch == '{') {
-                            JSONDictionary jd = new JSONDictionary(os);
-                            parse.parseAsDictionary(jd);
-                            return jd;
-                        }
-                        else if(ch == '[') {
-                            JSONArray ja = new JSONArray(os);
-                            parse.parseAsArray(ja);
-                            return ja;
-                        }
-                    } catch(JSONSyntaxError e) {
-                        e.printStackTrace();
+            // first pass sent to reviver
+            if(reviver != null) {
+                JSONArray out = new JSONArray();
+                arr.forEach((v, i) -> out.add(reviver.run(String.valueOf(i), v)));
+                // now we can set it back into the array
+                out.forEach(arr::set);
+            }
+            // second pass sent to standard parser
+            arr.replaceAll(o -> this.parseGeneric((String)o));
+        }
+        public Object parseGeneric(String object) {
+            char ch = object.charAt(0);
+            // then this would be a number
+            if(Character.isDigit(ch)) {
+                return object.contains(".") ? Double.parseDouble(object) : Integer.parseInt(object);
+            }
+            // recursively call parse
+            else if(object.startsWith("{") || object.startsWith("[")) {
+                final JSONParser parse = new JSONParser(object);
+                try {
+                    if(ch == '{') {
+                        JSONDictionary jd = new JSONDictionary(object);
+                        parse.parseAsDictionary(jd);
+                        return jd;
                     }
-                    return null;
+                    else if(ch == '[') {
+                        JSONArray ja = new JSONArray(object);
+                        parse.parseAsArray(ja);
+                        return ja;
+                    }
+                } catch(JSONSyntaxError e) {
+                    e.printStackTrace();
                 }
-                return o;
-            });
+                return null;
+            }
+            return object;
         }
         public void validateJSON() throws JSONSyntaxError {
             // JSON object type; '{' for Dictionary, '[' for Array
@@ -151,9 +229,14 @@ public class JSON {
             if((jot == '{' && jot2 != '}') || (jot == '[' && jot2 != ']')) throw new JSONSyntaxError(jot2, this.json.length() - 1);
             // just test now for single quotes
             if(this.json.contains("'")) throw new JSONSyntaxError("'", this.json.indexOf("'"));
+            // or ends with comma
+            // replace spaces (we don't care about content)
+            String us = this.json.replaceAll("\\s", "");
+            char jot3 = this.json.charAt(us.charAt(us.length() - 1));
+            if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
     }
-    public static String stringify(JSONObject json) throws JSONTypeError {
+    public String stringify(JSONObject json, JSONReviver replacer) throws JSONTypeError {
         return "";
     }
 }

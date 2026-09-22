@@ -455,4 +455,12 @@ public class Array<T> extends ArrayList<T> {
     public Array<T> clone() {
         return (Array<T>)super.clone();
     }
+    public void forEach(VoidFunc<T> callback) {
+        this.forEach((e, i) -> callback.run(e));
+    }
+    public void forEach(VoidFunc2<T, Integer> callback) {
+        for(int i = 0; i < this.len(); i++) {
+            callback.run(this.get(i), i);
+        }
+    }
 }
