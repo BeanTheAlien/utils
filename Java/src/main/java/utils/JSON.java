@@ -11,7 +11,7 @@ public class JSON {
         String ja1 = "[\"this is a test\", [\"hello\", \"world\"]]";
         String jd1 = "{ \"this\": \"is\", \"a\": \"test\" }";
         String ja2 = "[\"this\", \"errors\",]";
-        JSONDictionary jd2 = JSON.parse("{ \"hello\": \"world\" }");
+        JSONDictionary jd2 = JSON.parsed("{ \"hello\": \"world\" }");
         System.out.println(JSON.stringify(jd2));
     }
     public static interface JSONObject {
@@ -69,6 +69,18 @@ public class JSON {
         if(jo instanceof JSONDictionary jd) parser.parseAsDictionary(jd, reviver);
         else if(jo instanceof JSONArray ja) parser.parseAsArray(ja, reviver);
         return jo;
+    }
+    public static JSONDictionary parsed(String json) throws JSONSyntaxError {
+        return JSON.parsed(json, null);
+    }
+    public static JSONDictionary parsed(String json, JSONReviver reviver) throws JSONSyntaxError {
+        return (JSONDictionary)(JSON.parse(json, reviver));
+    }
+    public static JSONArray parsea(String json) throws JSONSyntaxError {
+        return JSON.parsea(json);
+    }
+    public static JSONArray parsea(String json, JSONReviver reviver) throws JSONSyntaxError {
+        return (JSONArray)(JSON.parse(json, reviver));
     }
     public static class JSONParser {
         String json;
@@ -202,7 +214,7 @@ public class JSON {
             // get a null string check out of the way
             if(object.equals("null")) return null;
             // then this would be a number
-            if(Character.isDigit(ch)) {
+            if(Character.isDigit(ch) || (ch == '-' && Character.isDigit(object.charAt(1)))) {
                 return object.contains(".") ? Double.parseDouble(object) : Integer.parseInt(object);
             }
             // recursively call parse
@@ -243,59 +255,43 @@ public class JSON {
             char jot3 = us.charAt(us.length() - 1);
             if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
+        public Object stringifyFromGeneric(Object value) {
+            // if value is number/boolan, return as a regular number
+            // null returns null
+            if(value instanceof Number || value instanceof Boolean || value == null) return String.valueOf(value);
+            // test a string
+            if(value instanceof String) return value;
+            // otherwise, looks like JSON?
+            char vc = String.valueOf(value).strip().charAt(0);
+            if(vc == '{' || vc == '[') {
+                // then stringify it
+                try { return JSON.stringify((JSONObject)value); } catch(JSONTypeError e) { e.printStackTrace(); }
+            }
+            return null;
+        }
         public Object stringifyGenericFromArray(JSONArray arr, int key, JSONReviver replacer) {
             if(replacer != null) {
                 // replacer handles everything
                 return replacer.run(String.valueOf(key), arr.get(key));
             }
-            String value = String.valueOf(arr.get(key));
-            // if value is number, return as a regular number
-            if(Character.isDigit(value.charAt(0))) return arr.get(key);
-            // maybe a boolean
-            if(value.equals("true") || value.equals("false")) return arr.get(key);
-            // perhaps a string
-            if(value.charAt(0) == '"') return "\"" + value + "\"";
-            // and lastly, null
-            if(value.equals("null")) return null;
-            // otherwise, looks like JSON?
-            char vc = value.strip().charAt(0);
-            if(vc == '{' || vc == '[') {
-                // then stringify it
-                return JSON.stringify(arr.get(key));
-            }
-            // unknown
-            return null;
+            Object value = arr.get(key);
+            return this.stringifyFromGeneric(value);
         }
         public Object stringifyGenericFromDictionary(JSONDictionary dict, String key, JSONReviver replacer) {
             if(replacer != null) {
                 // replacer handles everything
                 return replacer.run(key, dict.get(key));
             }
-            String value = String.valueOf(dict.get(key));
-            // if value is number, return as a regular number
-            if(Character.isDigit(value.charAt(0))) return dict.get(key);
-            // maybe a boolean
-            if(value.equals("true") || value.equals("false")) return dict.get(key);
-            // perhaps a string
-            if(value.charAt(0) == '"') return "\"" + value + "\"";
-            // and lastly, null
-            if(value.equals("null")) return null;
-            // otherwise, looks like JSON?
-            char vc = value.strip().charAt(0);
-            if(vc == '{' || vc == '[') {
-                // then stringify it
-                return JSON.stringify(dict.get(key));
-            }
-            // unknown
-            return null;
+            Object value = dict.get(key);
+            return this.stringifyFromGeneric(value);
         }
         public String stringifyAsDictionary(JSONDictionary dict, JSONReviver replacer) throws JSONTypeError {
             // we can easily key, value stringification
-            Set<Object> keys = dict.keySet();
-            String out = "{ ";
+            Set<String> keys = dict.keySet();
+            String out = "{";
             for(int i = 0; i < keys.size(); i++) {
-                String k = String.valueOf(keys.get(i));
-                out += keys.get(i) + ": " + this.stringifyGenericFromDictionary(dict, k, replacer);
+                String k = String.valueOf(keys.toArray()[i]);
+                out += keys.toArray()[i] + ": " + this.stringifyGenericFromDictionary(dict, k, replacer);
                 if(i < keys.size() - 1) out += ", ";
             }
             return out + " }";
@@ -305,18 +301,20 @@ public class JSON {
             // (so no List.toString())
             String out = "[ ";
             for(int i = 0; i < arr.len(); i++) {
-                String k = String.valueOf(arr.get(i));
                 out += this.stringifyGenericFromArray(arr, i, replacer);
                 if(i < arr.len() - 1) out += ", ";
             }
             return out + " ]";
         }
     }
+    public static String stringify(JSONObject json) throws JSONTypeError {
+        return JSON.stringify(json, null);
+    }
     public static String stringify(JSONObject json, JSONReviver replacer) throws JSONTypeError {
         // since each structure is handled differently, pass it on to the other stringifier
-        final JSONParser parser = new JSONParser(json);
-        if(json instanceof JSONDictionary jd) return parser.stringifyAsDictionary(jd);
-        else if(json instanceof JSONArray ja) return parser.stringifyAsArray(ja);
+        final JSONParser parser = new JSONParser(String.valueOf(json));
+        if(json instanceof JSONDictionary jd) return parser.stringifyAsDictionary(jd, replacer);
+        else if(json instanceof JSONArray ja) return parser.stringifyAsArray(ja, replacer);
         return null;
     }
 }
