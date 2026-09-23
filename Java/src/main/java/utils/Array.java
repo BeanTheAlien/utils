@@ -1,12 +1,16 @@
 package utils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.Collections;
 import java.util.stream.*;
 
+import utils.fn.Func;
+import utils.fn.Func1;
+import utils.fn.Func2;
 import utils.fn.VoidFunc;
 import utils.fn.VoidFunc2;
 
@@ -29,6 +33,9 @@ public class Array<T> extends ArrayList<T> {
     }
     public Array() {
         super();
+    }
+    public Array(Collection<T> collection) {
+        super(collection);
     }
     private List<T> __list(T... x) {
         return Arrays.asList(x);
@@ -458,12 +465,23 @@ public class Array<T> extends ArrayList<T> {
     public Array<T> clone() {
         return (Array<T>)super.clone();
     }
-    public void forEach(VoidFunc<T> callback) {
-        this.forEach((e, i) -> callback.run(e));
+    public Array<T> forEach(VoidFunc<T> callback) {
+        return this.forEach((e, i) -> callback.run(e));
     }
-    public void forEach(VoidFunc2<T, Integer> callback) {
+    public Array<T> forEach(VoidFunc2<T, Integer> callback) {
         for(int i = 0; i < this.len(); i++) {
             callback.run(this.get(i), i);
         }
+        return this;
+    }
+    public Array<T> submap(Func1<T, T> callback) {
+        this.replaceAll((v) -> callback.run(v));
+        return this;
+    }
+    public Array<T> submap(Func2<T, Integer, T> callback) {
+        for(int i = 0; i < this.len(); i++) {
+            this.set(i, callback.run(this.get(i), i));
+        }
+        return this;
     }
 }
