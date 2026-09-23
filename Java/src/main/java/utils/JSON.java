@@ -2,7 +2,6 @@ package utils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
-
 import utils.JSON.JSONError.*;
 import utils.JSON.JSONObject.*;
 import utils.fn.Func2;
@@ -12,7 +11,8 @@ public class JSON {
         String ja1 = "[\"this is a test\", [\"hello\", \"world\"]]";
         String jd1 = "{ \"this\": \"is\", \"a\": \"test\" }";
         String ja2 = "[\"this\", \"errors\",]";
-        System.out.println(JSON.parse(jd1));
+        JSONDictionary jd2 = JSON.parse("{ \"hello\": \"world\" }");
+        System.out.println(JSON.stringify(jd2));
     }
     public static interface JSONObject {
         public static class JSONDictionary extends HashMap<String, Object> implements JSONObject {
@@ -243,52 +243,80 @@ public class JSON {
             char jot3 = us.charAt(us.length() - 1);
             if(jot3 == ',') throw new JSONSyntaxError(jot3, this.json.lastIndexOf(","));
         }
+        public Object stringifyGenericFromArray(JSONArray arr, int key, JSONReviver replacer) {
+            if(replacer != null) {
+                // replacer handles everything
+                return replacer.run(String.valueOf(key), arr.get(key));
+            }
+            String value = String.valueOf(arr.get(key));
+            // if value is number, return as a regular number
+            if(Character.isDigit(value.charAt(0))) return arr.get(key);
+            // maybe a boolean
+            if(value.equals("true") || value.equals("false")) return arr.get(key);
+            // perhaps a string
+            if(value.charAt(0) == '"') return "\"" + value + "\"";
+            // and lastly, null
+            if(value.equals("null")) return null;
+            // otherwise, looks like JSON?
+            char vc = value.strip().charAt(0);
+            if(vc == '{' || vc == '[') {
+                // then stringify it
+                return JSON.stringify(arr.get(key));
+            }
+            // unknown
+            return null;
+        }
+        public Object stringifyGenericFromDictionary(JSONDictionary dict, String key, JSONReviver replacer) {
+            if(replacer != null) {
+                // replacer handles everything
+                return replacer.run(key, dict.get(key));
+            }
+            String value = String.valueOf(dict.get(key));
+            // if value is number, return as a regular number
+            if(Character.isDigit(value.charAt(0))) return dict.get(key);
+            // maybe a boolean
+            if(value.equals("true") || value.equals("false")) return dict.get(key);
+            // perhaps a string
+            if(value.charAt(0) == '"') return "\"" + value + "\"";
+            // and lastly, null
+            if(value.equals("null")) return null;
+            // otherwise, looks like JSON?
+            char vc = value.strip().charAt(0);
+            if(vc == '{' || vc == '[') {
+                // then stringify it
+                return JSON.stringify(dict.get(key));
+            }
+            // unknown
+            return null;
+        }
         public String stringifyAsDictionary(JSONDictionary dict, JSONReviver replacer) throws JSONTypeError {
             // we can easily key, value stringification
-            Set<String> keys = dict.keySet();
+            Set<Object> keys = dict.keySet();
             String out = "{ ";
-            for(String k : keys) {
-                out += k + ": ";
-                // now, test value
-                String v = String.valueOf(dict.get(k));
-                // if value is number, add as a regular number
-                if(Character.isDigit(v.charAt(0))) out += dict.get(k);
-                // maybe a boolean
-                if(v.equals("true") || v.equals("false")) out += dict.get(k);
-                // and lastly, null
-                if(v.equals("null")) out += null;
-                // otherwise, looks like JSON?
-                char vc = v.strip().charAt(0);
-                if(vc == '{' || vc == '[') {
-                    // looks like JSON
-                    final JSONParser parse = new JSONParser(v);
-                    JSONObject js = null;
-                    try {
-                        if(vc == '{') {
-                            js = new JSONDictionary(v);
-                            parse.parseAsDictionary((JSONDictionary)js, null);
-                        } else if(vc == '[') {
-                            js = new JSONArray(v);
-                            parse.parseAsArray((JSONArray)js, null);
-                        }
-                    } catch(JSONSyntaxError e) {
-                        e.printStackTrace();
-                    }
-                    // parsed out the JSON string
-                    // now we have to re-string it
-                    out += JSON.stringify(js, replacer);
-                }
+            for(int i = 0; i < keys.size(); i++) {
+                String k = String.valueOf(keys.get(i));
+                out += keys.get(i) + ": " + this.stringifyGenericFromDictionary(dict, k, replacer);
+                if(i < keys.size() - 1) out += ", ";
             }
             return out + " }";
         }
         public String stringifyAsArray(JSONArray arr, JSONReviver replacer) throws JSONTypeError {
             // we can't just convert everything to a string
-            // respect JSON object specifications
-            // number, boolean and null don't stringify
-            return "";
+            // (so no List.toString())
+            String out = "[ ";
+            for(int i = 0; i < arr.len(); i++) {
+                String k = String.valueOf(arr.get(i));
+                out += this.stringifyGenericFromArray(arr, i, replacer);
+                if(i < arr.len() - 1) out += ", ";
+            }
+            return out + " ]";
         }
     }
     public static String stringify(JSONObject json, JSONReviver replacer) throws JSONTypeError {
-        return "";
+        // since each structure is handled differently, pass it on to the other stringifier
+        final JSONParser parser = new JSONParser(json);
+        if(json instanceof JSONDictionary jd) return parser.stringifyAsDictionary(jd);
+        else if(json instanceof JSONArray ja) return parser.stringifyAsArray(ja);
+        return null;
     }
 }
