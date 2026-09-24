@@ -13,16 +13,23 @@ const template = (i, n, t, slices, subI) => `package utils.fn;
 @FunctionalInterface
 public interface ${gn(i, n, subI)}${i == 0 ? "" : `<${ltrs(i).join(", ")}>`} {
     ${t} run(${i == 0 ? "" : (slices ? ltrs(i-1).slice(0, i) : ltrs(i)).map((a, i) => `${a} arg${i}`).join(", ")});
-}`
+}`;
+const ttm = (i, n, si) => `package utils.tuple;
+
+public Record<${ltrs(i).join(", ")}> ${gn(i, n, si)}(${ltrs(i).map((a, i) => `${a} ${alpha[i].toLowerCase()}`).join(", ")}) {}`;
 const bog = (i, n, t, slices, subI) => [gn(i, n, subI), template(i, n, t, slices, subI)];
+const bog2 = (i, n) => [gn(i, n, false), ttm(i, n, false)];
 const ct = 10;
 for(let i = 1; i <= ct; i++) {
+    const w = (k, v) => fs.writeFileSync(`../Java/src/main/java/utils/${k}.java`, v);
     let [x, y] = bog(i, "Func", alpha[i-1], true, true);
-    fs.writeFileSync(`../Java/src/main/java/utils/fn/${x}.java`, y);
+    w(`fn/${x}`, y);
     [x, y] = bog(i, "BoolFunc", "boolean", false, false);
-    fs.writeFileSync(`../Java/src/main/java/utils/fn/${x}.java`, y);
+    w(`fn/${x}`, y);
     [x, y] = bog(i, "VoidFunc", "void", false, false);
-    fs.writeFileSync(`../Java/src/main/java/utils/fn/${x}.java`, y);
+    w(`fn/${x}`, y);
     [x, y] = bog(i, "TFunc", alpha[i-1], true, false);
-    fs.writeFileSync(`../Java/src/main/java/utils/fn/${x}.java`, y);
+    w(`fn/${x}`, y);
+    [x, y] = bog2(i, "Tuple");
+    w(`tpl/${x}`, y);
 }
