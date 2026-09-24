@@ -7,7 +7,8 @@ import java.util.Optional;
 import java.util.function.*;
 import java.util.Collections;
 import java.util.stream.*;
-
+import java.util.Set;
+import java.util.HashSet;
 import utils.fn.Func;
 import utils.fn.Func1;
 import utils.fn.Func2;
@@ -483,5 +484,8 @@ public class Array<T> extends ArrayList<T> {
             this.set(i, callback.run(this.get(i), i));
         }
         return this;
+    }
+    public Set<T> toSet() {
+        return new HashSet<>(this);
     }
 }

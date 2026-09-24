@@ -7,85 +7,76 @@ import java.util.Set;
  * <br><br>
  * Provides new UX.
  */
-public class Store<I, O> {
-    public HashMap<I, O> map;
+public class Store<K, V> extends HashMap<K, V> {
     /**
      * Creates a {@code Store}.
      */
     public Store() {
-        this.map = new HashMap<I, O>();
+        super();
     }
     /**
      * Removes a pair from the map.
-     * @param x The key to remove.
+     * @param key The key to remove.
      */
-    public void rm(I x) {
-        this.map.remove(x);
+    public void rm(K key) {
+        this.remove(key);
     }
     /**
      * Returns the length of the map.
      * @return The length.
      */
-    public int length() { return this.map.size(); }
-    /**
-     * Returns the associated value with key {@code k}.
-     * @param k The key.
-     * @return The value.
-     */
-    public O get(I k) {
-        return this.map.get(k);
-    }
+    public int len() { return this.size(); }
     /**
      * Sets an element in the map.
-     * @param k The key to set.
-     * @param v The value to set.
+     * @param key The key to set.
+     * @param value The value to set.
      */
-    public void set(I k, O v) {
-        this.map.put(k, v);
+    public void set(K key, V value) {
+        this.put(key, value);
     }
     /**
      * Returns whether this key is contained in the map.
-     * @param k The key to check.
+     * @param key The key to check.
      * @return If it is in the map.
      */
-    public boolean has(I k) {
-        return this.map.containsKey(k);
+    public boolean has(K key) {
+        return this.containsKey(key);
     }
     /**
      * Returns whether this value is contained in the map.
-     * @param v The value to check.
+     * @param value The value to check.
      * @return If it is in the map.
      */
-    public boolean hasVal(O v) {
-        return this.map.containsValue(v);
+    public boolean hasVal(V value) {
+        return this.containsValue(value);
     }
     /**
      * Returns whether this pair is contained in the map.
-     * @param k The key to check.
-     * @param v The value to check.
+     * @param key The key to check.
+     * @param value The value to check.
      * @return If it is in the map.
      */
-    public boolean hasPair(I k, O v) {
-        return this.has(k) && this.hasVal(v);
+    public boolean hasPair(K key, V value) {
+        return this.has(key) && this.hasVal(value);
     }
     /**
      * Clears the map.
      */
     public void empty() {
-        this.map.clear();
+        this.clear();
     }
-    /**
-     * Resizes this map to the specified length.
-     * @param length The new length.
-     */
-    public void length(int length) {
-        Set<I> ks = this.map.keySet();
-        HashMap<I, O> out = new HashMap<I, O>();
-        for(int i = 0; i < length && i < ks.size(); i++) {
-            I[] arr = (I[])ks.toArray();
-            I e = arr[i];
-            out.put(e, this.map.get(e));
-        }
-        this.map = out;
-    }
+    // /**
+    //  * Resizes this map to the specified length.
+    //  * @param length The new length.
+    //  */
+    // public void length(int length) {
+    //     Set<I> ks = this.map.keySet();
+    //     HashMap<I, O> out = new HashMap<I, O>();
+    //     for(int i = 0; i < length && i < ks.size(); i++) {
+    //         I[] arr = (I[])ks.toArray();
+    //         I e = arr[i];
+    //         out.put(e, this.map.get(e));
+    //     }
+    //     this.map = out;
+    // }
 }
