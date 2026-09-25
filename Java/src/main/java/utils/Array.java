@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.stream.*;
 import java.util.Set;
 import java.util.HashSet;
-import utils.fn.Func;
 import utils.fn.Func1;
 import utils.fn.Func2;
 import utils.fn.VoidFunc;
 import utils.fn.VoidFunc2;
+import utils.tpl.Tuple2;
 
 /**
  * {@code Array} is a convenient wrapper around {@code ArrayList}.
@@ -23,7 +23,7 @@ import utils.fn.VoidFunc2;
  * Most methods return a reference to {@code this} for method chaining.
  * @param <T> The type of object this array contains.
  */
-public class Array<T> extends ArrayList<T> {
+public class Array<T> extends ArrayList<T> implements Entries<String, T> {
     /**
      * Creates an {@code Array} with content specified automatically appended.
      * @param content The content to be included within the array.
@@ -487,5 +487,20 @@ public class Array<T> extends ArrayList<T> {
     }
     public Set<T> toSet() {
         return new HashSet<>(this);
+    }
+    public Array<String> keys() {
+        var out = new Array<String>();
+        for(int i = 0; i < this.len(); i++) out.add(String.valueOf(i));
+        return out;
+    }
+    public Array<T> values() {
+        var out = new Array<T>();
+        for(int i = 0; i < this.len(); i++) out.add(this.get(i));
+        return out;
+    }
+    public Array<Tuple2<String, T>> entries() {
+        var out = new Array<Tuple2<String, T>>();
+        for(int i = 0; i < this.len(); i++) out.add(new Tuple2<>(String.valueOf(i), this.get(i)));
+        return out;
     }
 }

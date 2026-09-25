@@ -2,12 +2,14 @@ package utils;
 import java.util.HashMap;
 import java.util.Set;
 
+import utils.tpl.Tuple2;
+
 /**
  * Enhances the capabilities of {@code HashMap}.
  * <br><br>
  * Provides new UX.
  */
-public class Store<K, V> extends HashMap<K, V> {
+public class Store<K, V> extends HashMap<K, V> implements Entries<K, V> {
     /**
      * Creates a {@code Store}.
      */
@@ -26,6 +28,9 @@ public class Store<K, V> extends HashMap<K, V> {
      * @return The length.
      */
     public int len() { return this.size(); }
+    public V gets(K key) {
+        return this.get(key);
+    }
     /**
      * Sets an element in the map.
      * @param key The key to set.
@@ -79,4 +84,15 @@ public class Store<K, V> extends HashMap<K, V> {
     //     }
     //     this.map = out;
     // }
+    public Array<K> keys() {
+        return new Array<>(this.keySet());
+    }
+    public Array<V> values() {
+        return new Array<>(super.values());
+    }
+    public Array<Tuple2<K, V>> entries() {
+        var out = new Array<Tuple2<K, V>>();
+        for(int i = 0; i < this.len(); i++) out.add(new Tuple2<>(this.keys().get(i), this.gets(this.keys().get(i))));
+        return out;
+    }
 }
