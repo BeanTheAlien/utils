@@ -21,9 +21,21 @@ public class BArray<T> implements List<T> {
     }
     public static final int size = 10;
     T[] arr;
+    /**
+     * Constructs the array.
+     * <br><br>
+     * Has an initial capacity of {@code size} (10).
+     */
     public BArray() {
         this.arr = this.__arr(size);
     }
+    /**
+     * Constructs the array with elements.
+     * <br><br>
+     * Has an initial capacity of {@code size} (10),
+     * or expands to fit {@code c}.
+     * @param c The items to add.
+     */
     public BArray(Collection<? extends T> c) {
         this();
         this.addAll(c);
@@ -75,17 +87,48 @@ public class BArray<T> implements List<T> {
         }
         this.arr = a;
     }
+    /**
+     * Returns the length of this array.
+     * @return The array length.
+     */
     public int length() {
         return this.arr.length;
     }
+    /**
+     * @see java.util.List#size()
+     * @return The array length.
+     */
     public int size() {
         return this.length();
     }
+    /**
+     * Returns the position of the element at the given position.
+     * <br><br>
+     * Supports negative indexing.
+     * <br><br>
+     * Negative indexing example
+     * <pre>
+     * public static void main(String[] args) {
+     *      BArray<String> array = new BArray<>();
+     *      array.addAll(List.of("Hello", "World"));
+     *      System.out.println(array.get(-1)); // "World"
+     * }
+     * </pre>
+     * @return The element at the provided index (or {@code null}, if the index is non-negative and exceeds the length).
+     * @see java.util.List#get(int)
+     */
     public T get(int index) {
+        if(!this.__isok(index)) return index < 0 ? this.arr[this.length() + index] : null;
         return this.arr[index];
     }
+    /**
+     * Replaces the element at the specified position in this list with the specified element (optional operation).
+     * @param element The element to replace at the index.
+     * @param index The index to replace at.
+     * @return The element that was previously there (or {@code null}, if there wasn't one).
+     */
     public T set(T element, int index) {
-        if(!this.__isok(index)) throw new IndexOutOfBoundsException("Index of " + index + " exceeds length of " + this.length());
+        if(!this.__isok(index)) throw new ArrayIndexOutOfBoundsException(index);
         T e = this.get(index);
         this.sets(element, index);
         return e;
@@ -95,8 +138,12 @@ public class BArray<T> implements List<T> {
     }
     /**
      * Sets an element at an index, ignoring bounds restrictions.
-     * 
+     * <br><br>
      * If the index is out of bounds, resizes the array.
+     * <br><br>
+     * Fills empty locations with {@code null}.
+     * @param element The element to set.
+     * @param index The index to set at.
      */
     public void sets(T element, int index) {
         while(!this.__isok(index)) this.__rs();
@@ -111,6 +158,15 @@ public class BArray<T> implements List<T> {
         this.__shift(index);
         this.set(index, element);
     }
+    /**
+     * Inserts the specified element at the specified position in this list
+     * (optional operation).  Shifts the element currently at that position
+     * (if any) and any subsequent elements to the right (adds one to their
+     * indices).
+     *
+     * @param index index at which the specified element is to be inserted
+     * @param element element to be inserted
+     */
     public void add(T element, int index) {
         this.add(index, element);
     }
@@ -126,13 +182,20 @@ public class BArray<T> implements List<T> {
         this.__cull();
         return e;
     }
+    /**
+     * Removes an index from the array.
+     * <br><br>
+     * Leaves a null reference where the element (if there was one) was.
+     * @param element The element to remove.
+     */
     public void removes(T element) {
         this.removes(this.indexOf(element));
     }
     /**
      * Removes an index from the array.
-     * 
+     * <br><br>
      * Leaves a null reference where the element (if there was one) was.
+     * @param index The index to remove.
      */
     public void removes(int index) {
         this.set(null, index);
