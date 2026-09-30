@@ -1,8 +1,11 @@
 package utils.array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import utils.fn.BoolFunc;
+import utils.fn.Func2;
 
 /**
  * {@code BArray} is a custom {@code List} implementation.
@@ -25,7 +28,13 @@ public class BArray<T> implements List<T> {
         BArray<String> x = new BArray<>();
         x.add("Hello");
         x.add("World");
-        System.out.println(x);
+        x.printRaw();
+        x.removes(1);
+        x.printRaw();
+        x.sets("HIIII", 4);
+        x.printRaw();
+        x.removesIndexes(List.of(1, 2, 3, 4, 5, 6, 7));
+        x.printRaw();
     }
     public static final int size = 10;
     T[] arr;
@@ -214,6 +223,7 @@ public class BArray<T> implements List<T> {
      * <br><br>
      * Leaves a null reference where the element (if there was one) was.
      * @param index The index to remove.
+     * @throws ArrayIndexOutOfBoundsException If the index to remove is out-of-bounds.
      */
     public void removes(int index) {
         this.set(null, index);
@@ -296,6 +306,26 @@ public class BArray<T> implements List<T> {
         c.forEach(this::remove);
         return true;
     }
+    /**
+     * Deletes all indexes provided.
+     * <br><br>
+     * Runs {@code remove} operation.
+     * @param indexes The indexes to remove.
+     * @see #remove(int)
+     */
+    public void removeIndexes(Collection<Integer> indexes) {
+        indexes.forEach(this::remove);
+    }
+    /**
+     * Deletes all indexes provided.
+     * <br><br>
+     * Runs {@code removes} operation.
+     * @param indexes The indexes to remove.
+     * @see #removes(int)
+     */
+    public void removesIndexes(Collection<Integer> indexes) {
+        indexes.forEach(this::removes);
+    }
     public boolean retainAll(Collection<?> c) {
         c.forEach(x -> {
             if(!this.contains(x)) this.removes((T)x);
@@ -359,23 +389,47 @@ public class BArray<T> implements List<T> {
         return this.join(", ");
     }
     /**
+     * Returns a raw join of the array.
+     * @return The raw representation.
+     * @see #rawJoin(String)
+     */
+    public String toRawString() {
+        return this.rawJoin(", ");
+    }
+    private String __join(Func2<BArray<T>, Integer, Void> func, String delim) {
+        var self = this.clone();
+        StringBuilder s = new StringBuilder("[");
+        for(int i = 0; i < self.length(); i++) {
+            func.run(self, i);
+            s.append(self.get(i)).append(i < self.length() - 1 ? delim : "");
+        }
+        return s.append("]").toString();
+    }
+    /**
      * Returns this as a string, joined by a given delimiter.
      * @param delim The delimiter to use.
      * @return This, as a string, joined by the delimiter.
      */
     public String join(String delim) {
-        var self = this.clone();
-        self.__shr();
-        StringBuilder s = new StringBuilder("[");
-        for(int i = 0; i < self.length(); i++) {
-            T e = self.get(i);
-            if(e == null) continue;
-            s.append(e).append(i < self.length() - 1 ? delim : "");
-        }
-        return s.append("]").toString();
+        return this.__join((self, i) -> {
+            if(i == 0) self.__shr();
+            return null;
+        }, delim);
+    }
+    /**
+     * Returns this as a string, joined by a given delimiter.
+     * <br><br>
+     * Includes null elements in final {@code String}, instead of cleaning them out.
+     * @param delim The delimiter to use.
+     * @return This, as a string, joined by the delimiter.
+     */
+    public String rawJoin(String delim) {
+        return this.__join((self, i) -> null, delim);
     }
     public BArray<T> clone() {
-        return (BArray<T>)super.clone();
+        var x = new BArray<T>(this.length());
+        x.apply(this.arr);
+        return x;
     }
     /**
      * Returns all the elements that are not {@code null}.
@@ -561,5 +615,21 @@ public class BArray<T> implements List<T> {
         for(int i = fromIndex; i < fromIndex + deleteCount; i++) this.removes(i);
         this.addAll(fromIndex, List.of(addElements));
         return slice;
+    }
+    /**
+     * Cleans up this array.
+     * <br><br>
+     * Deletes {@code null} elements and shifts elements to fill the space.
+     * <br><br>
+     * Automatically shrinks the array to de-size for now-deleted {@code null} elements.
+     */
+    public void clean() {
+        this.__shr();
+    }
+    public void print() {
+        System.out.println(this);
+    }
+    public void printRaw() {
+        System.out.println(this.toRawString());
     }
 }
