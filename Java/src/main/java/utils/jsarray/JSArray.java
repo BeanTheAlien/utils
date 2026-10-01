@@ -53,6 +53,13 @@ public class JSArray<T> {
     public int length() {
         return this.arr.length;
     }
+    public void length(int length) {
+        var x = this.__arr(length);
+        for(int i = 0; i < length; i++) {
+            x[i] = this.get(i);
+        }
+        this.arr = x;
+    }
     public T at(int index) {
         return index < 0 ? this.get(this.length() + index) : (index >= this.length() ? null : this.get(index));
     }
@@ -78,7 +85,18 @@ public class JSArray<T> {
     }
     @SuppressWarnings("unchecked")
     public int push(T... elements) {
-        return 0;
+        if(elements == null) {
+            return this.length();
+        }
+        var x = this.__arr(this.length() + elements.length);
+        for(int i = 0; i < this.length(); i++) {
+            x[i] = this.get(i);
+        }
+        for(int i = 0; i < elements.length; i++) {
+            x[this.length() + i] = elements[i];
+        }
+        this.arr = x;
+        return this.length();
     }
     public <R> void forEach(Cb<T, R> callback) {
         this.forEach((x, i) -> callback.run(x));
@@ -236,7 +254,10 @@ public class JSArray<T> {
         return x;
     }
     public T pop() {
-        throw new UnsupportedOperationException();
+        return this.splice(this.length() - 1, 1).get(0);
+    }
+    public T shift() {
+        return this.splice(0, 1).get(0);
     }
     public JSArray<T> splice(int start) {
         return this.splice(start, this.length() - start);
@@ -246,11 +267,119 @@ public class JSArray<T> {
     }
     @SuppressWarnings("unchecked")
     public JSArray<T> splice(int start, int deleteCount, T... addElements) {
-        var x = new JSArray<T>();
-        for(int i = start; i < start + deleteCount; i++) {
-            x.push(this.get(i));
+        if(start < 0) {
+            start = Math.max(0, this.length() + start);
         }
-        if(addElements == null) return x;
-        return x;
+        if(start > this.length()) {
+            start = this.length();
+        }
+        if(deleteCount < 0) {
+            deleteCount = 0;
+        }
+        if(deleteCount > this.length() - start) {
+            deleteCount = this.length() - start;
+        }
+        var r = new JSArray<T>();
+        for(int i = start; i < start + deleteCount; i++) {
+            r.push(this.get(i));
+        }
+        var next = this.__arr(this.length() - deleteCount + (addElements == null ? 0 : addElements.length));
+        for(int i = 0; i < start; i++) {
+            next[i] = this.get(i);
+        }
+        if(addElements != null) {
+            for(int i = 0; i < addElements.length; i++) {
+                next[start + i] = addElements[i];
+            }
+        }
+        int ii = start + (addElements == null ? 0 : addElements.length);
+        for(int i = start + deleteCount; i < this.length(); i++) {
+            next[ii + (i - (start + deleteCount))] = this.get(i);
+        }
+        this.arr = next;
+        return r;
+    }
+    public JSArray<T> slice() {
+        return this.slice(0);
+    }
+    public JSArray<T> slice(int start) {
+        return this.slice(start, this.length());
+    }
+    @SuppressWarnings("unchecked")
+    public JSArray<T> slice(int start, int end) {
+        if(start >= this.length() || start >= end) return new JSArray<>();
+        var s = new JSArray<T>();
+        for(int i = start; i < end; i++) {
+            s.push(this.get(i));
+        }
+        return s;
+    }
+    private <R> R __reduc(Func2<R, T, R> rd, R iv, int i0, BoolFunc<Integer> test, int ix) {
+        R acc = iv;
+        for(int i = i0; test.run(i); i += ix) {
+            acc = rd.run(acc, this.get(i));
+        }
+        return acc;
+    }
+    public <R> R reduce(Func2<R, T, R> reducer, R initalValue) {
+        return this.__reduc(reducer, initalValue, 0, i -> i < this.length(), 1);
+    }
+    public <R> R reduceRight(Func2<R, T, R> reducer, R initalValue) {
+        return this.__reduc(reducer, initalValue, this.length() - 1, i -> i >= 0, -1);
+    }
+    public JSArray<T> reverse() {
+        var x = this.__arr(this.length());
+        for(int i = this.length() - 1; i >= 0; i--) {
+            x[this.length() - 1 - i] = this.get(i);
+        }
+        this.arr = x;
+        return this;
+    }
+    public JSArray<T> flat() {
+        return this.flat(1);
+    }
+    @SuppressWarnings("unchecked")
+    public JSArray<T> flat(int depth) {
+        if(depth < 0) depth = 0;
+        var out = new JSArray<T>();
+        for (int i = 0; i < this.length(); i++) {
+            var v = this.get(i);
+            if(v instanceof JSArray<?> arr && depth > 0) {
+                for(int j = 0; j < arr.length(); j++) {
+                    var child = arr.get(j);
+                    if(child instanceof JSArray<?> nested && depth > 1) {
+                        // recurse for deeper nesting
+                        var sub = ((JSArray<?>)nested).flat(depth - 1);
+                        for(int k = 0; k < sub.length(); k++) {
+                            out.push((T)sub.get(k));
+                        }
+                    } else {
+                        out.push((T)child);
+                    }
+                }
+            } else {
+                out.push((T)v);
+            }
+        }
+        return out;
+    }
+    public <R> JSArray<R> flatMap(Cb<T, R> callback) {
+        return this.map((v, i) -> callback.run(v)).flat();
+    }
+    public <R> JSArray<R> flatMap(Cb1<T, R> callback) {
+        return this.map((v, i, s) -> callback.run(v, i)).flat();
+    }
+    @SuppressWarnings("unchecked")
+    public <R> JSArray<R> flatMap(Cb2<T, R> callback) {
+        var x = new JSArray<R>();
+        this.forEach((v, i) -> x.push(callback.run(v, i, this)));
+        return x.flat();
+    }
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public JSArray<T> sort() {
+        return this.sort((a, b) -> ((Comparable)a).compareTo((Comparable)b));
+    }
+    public JSArray<T> sort(Func2<T, T, Integer> compareFn) {
+        throw new UnsupportedOperationException();
     }
 }

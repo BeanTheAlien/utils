@@ -1,5 +1,10 @@
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\Array.java
-C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\BArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\CharArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\DblArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\FltArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\IntArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\array\StrArray.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\barray\BArray.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\canvas\Binds.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\canvas\Brush.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\canvas\Canvas.java
@@ -43,6 +48,7 @@ C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\fn\VoidFunc
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\ghost.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\Input.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\IO.java
+C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\jsarray\JSArray.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\JSON.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\Output.java
 C:\Users\bagoldstein\Documents\GitHub\utils\Java\src\main\java\utils\Parse.java
