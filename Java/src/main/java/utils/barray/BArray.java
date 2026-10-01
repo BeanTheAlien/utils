@@ -1,4 +1,4 @@
-package utils.array;
+package utils.barray;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
