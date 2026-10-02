@@ -1,8 +1,8 @@
 package utils.jsarray;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
 import utils.fn.BoolFunc;
 import utils.fn.BoolFunc2;
-import utils.fn.Func;
 import utils.fn.Func1;
 import utils.fn.Func2;
 import utils.fn.Func3;
@@ -49,6 +49,10 @@ public class JSArray<T> {
     }
     public JSArray(int size) {
         this.arr = this.__arr(size);
+    }
+    public JSArray(T... elements) {
+        this();
+        this.push(elements);
     }
     public int length() {
         return this.arr.length;
@@ -174,8 +178,6 @@ public class JSArray<T> {
     public T findLast(BoolFunc<T> predicate) {
         return this.__finder(this::findLastIndex, predicate);
     }
-    // flat
-    // flatMap
     public boolean includes(T element) {
         return this.some(v -> v.equals(element));
     }
@@ -375,11 +377,53 @@ public class JSArray<T> {
         this.forEach((v, i) -> x.push(callback.run(v, i, this)));
         return x.flat();
     }
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public JSArray<T> sort() {
-        return this.sort((a, b) -> ((Comparable)a).compareTo((Comparable)b));
+    private int __compr(T a, T b) {
+        return ((Comparable<T>)a).compareTo(b);
     }
-    public JSArray<T> sort(Func2<T, T, Integer> compareFn) {
-        throw new UnsupportedOperationException();
+    @SuppressWarnings("unchecked")
+    public JSArray<T> sort() {
+        return this.sort(this::__compr);
+    }
+    public JSArray<T> sort(Comparator<? super T> compareFn) {
+        if(this.length() >= 50) {
+            this.__mgSort(this.arr);
+        } else {
+            this.__insSort(compareFn);
+        }
+        return this;
+    }
+    private void __insSort(Comparator<? super T> c) {
+        for(int i = 1; i < this.length(); i++) {
+            T k = this.get(i);
+            int j = i - 1;
+            while(j >= 0 && c.compare(this.get(j), k) > 0) {
+                this.set(this.get(j), j+1);
+                j--;
+            }
+            this.set(k, j+1);
+        }
+    }
+    private void __mgSort(T[] a) {
+        if(a == null || a.length < 2) return;
+        int m = a.length / 2;
+        var l = (new JSArray<>(a)).slice(0, m).arr;
+        var r = (new JSArray<>(a)).slice(m).arr;
+        this.__mgSort(l);
+        this.__mgSort(r);
+        this.__mg(a, l, r);
+    }
+    private void __mg(T[] out, T[] l, T[] r) {
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        while(i < l.length && j < r.length) {
+            if(this.__compr(l[i], r[j]) <= 0) {
+                out[k++] = l[i++];
+            } else {
+                out[k++] = r[j++];
+            }
+        }
+        while(i < l.length) out[k++] = l[i++];
+        while(j < r.length) out[k++] = r[j++];
     }
 }

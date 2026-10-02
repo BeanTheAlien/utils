@@ -59,4 +59,10 @@ public class Random {
         for(int i = 0; i < count; i++) arr.add(Random.randBool());
         return arr;
     }
+    public static int index(Object[] array) {
+        return Random.random(0, array.length);
+    }
+    public static <T> T item(T[] array) {
+        return array[Random.index(array)];
+    }
 }

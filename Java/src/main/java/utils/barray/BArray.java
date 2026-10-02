@@ -1,5 +1,4 @@
 package utils.barray;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,9 +88,6 @@ public class BArray<T> implements List<T> {
             if(this.get(i) == null) return i;
         }
         return -1;
-    }
-    private boolean __space() {
-        return this.__spaceidx() != -1;
     }
     private boolean __isok(int i) {
         return i >= 0 && i < this.length();
