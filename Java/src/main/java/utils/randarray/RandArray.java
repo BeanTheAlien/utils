@@ -1,7 +1,6 @@
 package utils.randarray;
 import java.util.Arrays;
 import java.util.Collections;
-
 import utils.Random;
 
 /**
@@ -102,5 +101,21 @@ public class RandArray<T> {
         for(int i = 0; i < prayers; i++) {
             Collections.shuffle(Arrays.asList(this.arr));
         }
+    }
+    /**
+     * Remove an element.
+     * <br><br>
+     * Maybe it removes something you want to remove, maybe not.
+     * @return The removed element. Or not. I dunno.
+     */
+    public T remove() {
+        int j = this.__jpmorgan() ? this.__big() : Random.index(this.arr);
+        var k = this.get();
+        var x = this.__arr(this.arr.length - 1);
+        for(int i = 0; i < x.length; i++) {
+            if(i != j) x[i] = this.get();
+        }
+        this.arr = x;
+        return k;
     }
 }
