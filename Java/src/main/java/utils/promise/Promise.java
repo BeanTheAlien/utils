@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Promise {
-    private static class Promised<T> {
+    public static class Promised<T> {
         CompletableFuture<T> async;
         public Promised(Supplier<T> x) {
             this.async = CompletableFuture.supplyAsync(x);
