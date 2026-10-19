@@ -9,11 +9,15 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.util.concurrent.CompletableFuture;
 
 import utils.promise.Promise;
-import utils.promise.Promise.Promised;
 
 import java.net.http.HttpResponse;
 
 public class Net {
+    private static class ResponsePromise extends Promise<CompletableFuture<HttpResponse<String>>> {
+        public ResponsePromise(CompletableFuture<HttpResponse<String>> sup) {
+            super(() -> sup);
+        }
+    }
     private static HttpClient client;
     private static void __cli() {
         Net.client = Net.client == null ? HttpClient.newHttpClient() : Net.client;
@@ -31,9 +35,9 @@ public class Net {
         Net.__cli();
         return Net.client.send(rq, BodyHandlers.ofString());
     }
-    private static Promised<CompletableFuture<HttpResponse<String>>> __sendAsync(HttpRequest rq) throws IOException, InterruptedException {
+    private static ResponsePromise __sendAsync(HttpRequest rq) throws IOException, InterruptedException {
         Net.__cli();
-        return Promise.nw(() -> Net.client.sendAsync(rq, BodyHandlers.ofString()));
+        return new ResponsePromise(Net.client.sendAsync(rq, BodyHandlers.ofString()));
     }
     public static HttpResponse<String> get(String url, String... header) throws IOException, InterruptedException {
         return Net.__send(Net.mkGet(url, header));
@@ -41,10 +45,10 @@ public class Net {
     public static HttpResponse<String> post(String url, String payload, String... header) throws IOException, InterruptedException {
         return Net.__send(Net.mkPost(url, payload, header));
     }
-    public static Promised<CompletableFuture<HttpResponse<String>>> getAsync(String url, String... header) throws IOException, InterruptedException {
+    public static ResponsePromise getAsync(String url, String... header) throws IOException, InterruptedException {
         return Net.__sendAsync(Net.mkGet(url, header));
     }
-    public static Promised<CompletableFuture<HttpResponse<String>>> postAsync(String url, String payload, String... header) throws IOException, InterruptedException {
+    public static ResponsePromise postAsync(String url, String payload, String... header) throws IOException, InterruptedException {
         return Net.__sendAsync(Net.mkPost(url, payload, header));
     }
 }
