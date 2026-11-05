@@ -13,7 +13,7 @@ import utils.promise.Promise;
 import java.net.http.HttpResponse;
 
 public class Net {
-    private static class ResponsePromise extends Promise<CompletableFuture<HttpResponse<String>>> {
+    private static class ResponsePromise extends Promise<HttpResponse<String>> {
         public ResponsePromise(CompletableFuture<HttpResponse<String>> sup) {
             super(() -> sup);
         }

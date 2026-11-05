@@ -1,13 +1,14 @@
 package utils.promise;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Promise<T> {
     private CompletableFuture<T> async;
-    public Promise(Supplier<T> x) {
-        this.async = CompletableFuture.supplyAsync(x);
+    public Promise(Supplier<? extends CompletionStage<T>> x) {
+        this.async = CompletableFuture.supplyAsync(x).thenCompose(stage -> stage);
     }
     private Promise(CompletableFuture<?> x) {
         this.async = (CompletableFuture<T>)x;
@@ -21,11 +22,11 @@ public class Promise<T> {
         return new Promise<>(this.async.thenApply(func));
     }
     @SuppressWarnings("unused")
-    public Promise<T> catchx(Function<Throwable, ? extends T> func) {
+    public Promise<T> catches(Function<Throwable, ? extends T> func) {
         return new Promise<>(this.async.exceptionally(func));
     }
     @SuppressWarnings("unused")
-    public Promise<T> finallyx(Supplier<Void> func) {
+    public Promise<T> finale(Supplier<Void> func) {
         return new Promise<>(this.async.whenComplete((a, b) -> func.get()));
     }
 }
