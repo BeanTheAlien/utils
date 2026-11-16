@@ -2,22 +2,29 @@ import * as fs from "fs";
 import * as readline from "readline";
 
 export default async function(arg) {
-    const style = arg[0] ?? "cjs";
+    const s = arg[0] ?? "cjs";
+    /**
+     * @type {"cjs" | "mjs"}
+     */
+    const style = s != "cjs" && s != "mjs" && s != "common" && s != "module" ? (() => {
+        console.log(`Not a valid type '${s}' (expected 'cjs'/'common', 'mjs'/'module')`);
+        return "cjs";
+    })() : (s == "cjs" || s == "mjs" ? s : (s == "common" ? "cjs" : "mjs"));
     console.log("Creating bin dir...");
     fs.mkdirSync("bin");
     console.log("Creating bin/cmds dir...");
     fs.mkdirSync("bin/cmds");
     console.log("Writing bin file...");
     fs.writeFileSync("bin/bin.js", `#!/usr/bin/env node
-const fs = require("fs");
-const path = require("path");
+${style == "cjs" ? `const fs = require("fs");` : `import * as fs from "fs";`}
+${style == "cjs" ? `const path = require("path");` : `import * as path from "path";`}
 
 const [,, cmd, ...args] = process.argv;
 const commandsDir = path.join(__dirname, "cmds");
 
 const commands = Object.fromEntries(
     fs.readdirSync(commandsDir)
-        .map(file => [file.replace(".js", ""), () => require(path.join(commandsDir, file))])
+        .map(file => [file.replace(".js", ""), () => ${style == "cjs" ? "require" : "import"}(path.join(commandsDir, file))])
 );
 
 if(commands[cmd]) {
@@ -36,7 +43,7 @@ if(commands[cmd]) {
     if((await ask("Add to package.json? (y/n): ")).toLowerCase() == "y") {
         const x = await ask("Enter names (seperate by ,): ");
         const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-        pkg["bin"] = {};
+        pkg["bin"] = { ...pkg["bin"] };
         for(const y of x.split(",")) pkg["bin"][y.trim()] = "bin/bin.js";
         fs.writeFileSync("package.json", JSON.stringify(pkg));
     }
